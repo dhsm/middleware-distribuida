@@ -8,8 +8,9 @@ type ClientRequestHandler struct {
   Connection net.Conn
 }
 
-func (crh ClientRequestHandler) NewCRH(protocol string, address string){
-  conn, _ := net.Dial(protocol, address)
+func (crh *ClientRequestHandler) NewCRH(protocol string, address string){
+  //conn, err := net.Dial(protocol, address)
+  conn, _ := net.Dial("tcp", "127.0.0.1:8081")
   crh.Connection = conn
 }
 

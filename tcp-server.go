@@ -8,7 +8,7 @@ import "strings"
 func main(){
 	fmt.Println("Lauching server...")
 
-	ln, _ := net.Listen("tcp", ":8081")
+	ln, _ := net.Listen("tcp", "127.0.0.1:8081")
 
 	conn, _ := ln.Accept()
 

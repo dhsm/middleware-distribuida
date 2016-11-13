@@ -1,22 +1,17 @@
 package main
 
-import . "./message"
 import . "./client_request_handler"
-import "encoding/json"
 import "fmt"
 
 func main(){
   crh := ClientRequestHandler{}
   crh.NewCRH("tcp", "127.0.0.1:8081")
 
-  msg := Message{"oi servidor"}
-  msgMarshaled, _ := json.Marshal(msg)
+  //sample := []byte{0,0,0,0,0}
 
-  crh.Send(msgMarshaled)
+  //crh.Send(sample)
 
   msgReceived := crh.Receive()
 
-  var msgUnmarshaled Message
-  message := json.Unmarshal(msgReceived, &msgUnmarshaled)
-  fmt.Println(message)
+  fmt.Println(msgReceived)
 }
