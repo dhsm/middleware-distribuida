@@ -14,7 +14,6 @@ func (srh *ServerRequestHandler) NewSRH(protocol string, port string){
 
   srh.Listen = ln
   srh.Connection = conn
-
 }
 
 func (srh ServerRequestHandler) Send(msg []byte) {
