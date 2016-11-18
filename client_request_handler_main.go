@@ -11,18 +11,16 @@ func main(){
 
   msg := Message{"oi servidor"}
 
-  msgMarshaled, err := json.Marshal(msg)
-  fmt.Println(err)
+  msgMarshaled, _ := json.Marshal(msg)
+  fmt.Print("mensagem em bytes: ")
   fmt.Println(len(msgMarshaled))
-  fmt.Println(msgMarshaled)
-  //sample := []byte{0,0,0,0,1}
-  //crh.Send(sample)
   crh.Send(msgMarshaled)
 
   msgReceived := crh.Receive()
+  fmt.Print("bytes da mensagem recebida: ")
   fmt.Println(msgReceived)
   var msgUnmarshaled Message
   _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
-  fmt.Println(err)
+  fmt.Print("mensagem recebida: ")
   fmt.Println(msgUnmarshaled)
 }

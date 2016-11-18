@@ -10,16 +10,13 @@ func main(){
   srh.NewSRH("tcp", "127.0.0.1:8081")
 
   bytes := srh.Receive()
-  fmt.Println(bytes)
-  //sample := []byte{0,0,0,0,1}
-  //srh.Send(sample)
+
+  var msgUnmarshaled Message
+  _ = json.Unmarshal(bytes, &msgUnmarshaled)
+  fmt.Print("mensagem recebida: ")
+  fmt.Println(msgUnmarshaled)
 
   msg := Message{"oi cliente"}
   msgMarshaled, _ := json.Marshal(msg)
   srh.Send(msgMarshaled)
-
-  var msgUnmarshaled Message
-  err := json.Unmarshal(bytes, &msgUnmarshaled)
-  fmt.Println(err)
-  fmt.Println(msgUnmarshaled)
 }

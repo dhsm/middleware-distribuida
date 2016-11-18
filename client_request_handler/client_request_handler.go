@@ -2,7 +2,6 @@ package client_request_handler
 
 import "net"
 import "bufio"
-import "fmt"
 
 type ClientRequestHandler struct {
   Connection net.Conn
@@ -15,7 +14,7 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, address string){
 }
 
 func (crh ClientRequestHandler) Send(msg []byte){
-  fmt.Fprint(crh.Connection,msg,"\n")
+  crh.Connection.Write(msg)
 }
 
 func (crh ClientRequestHandler) Receive () []byte{
