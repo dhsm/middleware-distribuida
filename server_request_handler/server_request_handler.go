@@ -1,8 +1,9 @@
 package server_request_handler
 
 import "net"
-import "bufio"
+//import "bufio"
 import "fmt"
+import "io"
 
 type ServerRequestHandler struct{
   Listen net.Listener
@@ -22,7 +23,12 @@ func (srh ServerRequestHandler) Send(msg []byte) {
 }
 
 func (srh *ServerRequestHandler) Receive() []byte {
-  bytes, _ := bufio.NewReader(srh.Connection).ReadBytes('\n')
+  //bytes, _ := bufio.NewReader(srh.Connection).ReadBytes('\n')
+  p := make([]byte, 25)
+  bytes,_ := io.ReadFull(srh.Connection,p)
+  //_, err = bufio.NewReader(srh.Connection).Read(p)
+  //fmt.Println("%s\n", p)
   fmt.Println(bytes)
-  return bytes
+  return p
+  //return bytes
 }

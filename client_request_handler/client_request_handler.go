@@ -20,5 +20,7 @@ func (crh ClientRequestHandler) Send(msg []byte){
 
 func (crh ClientRequestHandler) Receive () []byte{
   bytes, _ := bufio.NewReader(crh.Connection).ReadBytes('\n')
+  //var buf bytes
+  crh.Connection.Close()
   return bytes
 }

@@ -11,10 +11,15 @@ func main(){
 
   bytes := srh.Receive()
   fmt.Println(bytes)
-  sample := []byte{0,0,0,0,1}
-  srh.Send(sample)
+  //sample := []byte{0,0,0,0,1}
+  //srh.Send(sample)
+
+  msg := Message{"oi cliente"}
+  msgMarshaled, _ := json.Marshal(msg)
+  srh.Send(msgMarshaled)
 
   var msgUnmarshaled Message
-  _ = json.Unmarshal(bytes, &msgUnmarshaled)
+  err := json.Unmarshal(bytes, &msgUnmarshaled)
+  fmt.Println(err)
   fmt.Println(msgUnmarshaled)
 }

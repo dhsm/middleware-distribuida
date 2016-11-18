@@ -11,11 +11,18 @@ func main(){
 
   msg := Message{"oi servidor"}
 
-  msgMarshaled, _ := json.Marshal(msg)
+  msgMarshaled, err := json.Marshal(msg)
+  fmt.Println(err)
+  fmt.Println(len(msgMarshaled))
   fmt.Println(msgMarshaled)
+  //sample := []byte{0,0,0,0,1}
+  //crh.Send(sample)
   crh.Send(msgMarshaled)
 
   msgReceived := crh.Receive()
-
   fmt.Println(msgReceived)
+  var msgUnmarshaled Message
+  _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
+  fmt.Println(err)
+  fmt.Println(msgUnmarshaled)
 }
