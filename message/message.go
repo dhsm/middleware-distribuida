@@ -4,4 +4,5 @@ package message
 
 type Message struct {
   Msgtext string
+  Priority int
 }
