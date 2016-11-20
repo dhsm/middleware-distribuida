@@ -18,16 +18,17 @@ func main(){
   fmt.Println(msgMarshaled)
   fmt.Println(msg.Msgtext)
 
-  crh.Send(msgMarshaled)
+  crh.Send(msg)
 
+  var msgReceived Message
   msgReceived, err := crh.Receive()
   if(err != nil){
     fmt.Println(err)
   }
   fmt.Print("bytes da mensagem recebida: ")
   fmt.Println(msgReceived)
-  var msgUnmarshaled Message
-  _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
-  fmt.Print("mensagem recebida: ")
-  fmt.Println(msgUnmarshaled)
+  // var msgUnmarshaled Message
+  // _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
+  // fmt.Print("mensagem recebida: ")
+  // fmt.Println(msgUnmarshaled)
 }
