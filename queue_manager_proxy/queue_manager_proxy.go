@@ -17,3 +17,12 @@ func (qmp *QueueManagerProxy) send(msg Message){
   packetMarshaled, _ := json.Marshal(packet)
   crh.send(packetMarshaled)
 }
+
+func (qmp *QueueManagerProxy) receive() string{
+  crh := ClientRequestHandler{}
+  crh.NewCRH("tcp", "127.0.0.1:8081")
+  msgReceived := crh.Receive()
+  var msgUnmarshaled Message
+  _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
+  return msgUnmarshaled.Msgtext
+}
