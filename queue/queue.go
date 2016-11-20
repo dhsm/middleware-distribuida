@@ -1,6 +1,6 @@
 package queue
 
-import . "./message"
+import . "../message"
 import "container/heap"
 import "fmt"
 

@@ -1,6 +1,7 @@
 package main
 
 import . "./queue"
+import . "./message"
 
 func main(){
     msg := Message{"husadhusaid"}
