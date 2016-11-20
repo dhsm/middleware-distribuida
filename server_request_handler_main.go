@@ -14,9 +14,9 @@ func main(){
   var msgUnmarshaled Message
   _ = json.Unmarshal(bytes, &msgUnmarshaled)
   fmt.Print("mensagem recebida: ")
-  fmt.Println(msgUnmarshaled)
+  fmt.Println(msgUnmarshaled.Msgtext)
 
-  msg := Message{"oi cliente"}
+  msg := Message{"oi cliente", 99, 0}
   msgMarshaled, _ := json.Marshal(msg)
   srh.Send(msgMarshaled)
 }
