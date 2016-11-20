@@ -5,5 +5,5 @@ package message
 type Message struct {
   Msgtext string
   Priority int
-  Index int //This is necessary because we are using a PriorityQueue
+  // Index int //This is necessary because we are using a PriorityQueue
 }
