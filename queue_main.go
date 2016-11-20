@@ -9,7 +9,7 @@ func main(){
     msg := Message{"husadhusaid", 97}
     msg2 := Message{"yolo", 2}
     msg3 := Message{"olol", 55}
-    msg4 := Message{"kkkraiolaser", 97}
+    msg4 := Message{"kkkraiolaser", 100}
     pq := make(PriorityQueue, 1)
     pq[0] = &msg
     //pq[1] = &msg2
@@ -17,10 +17,14 @@ func main(){
     //pq[3] = &msg4
     heap.Init(&pq)
     heap.Push(&pq, &msg)
+    heap.Fix(&pq, pq.Len())
     heap.Push(&pq, &msg2)
+    heap.Fix(&pq, pq.Len())
     heap.Push(&pq, &msg3)
+    heap.Fix(&pq, pq.Len())
     heap.Push(&pq, &msg4)
+    heap.Fix(&pq, pq.Len())
     fmt.Println("precisa ser husadhusaid")
     msgPop := heap.Pop(&pq).(*Message)
-    fmt.Print(*msgPop.Msgtext)
+    fmt.Println(msgPop.Msgtext)
 }

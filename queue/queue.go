@@ -1,11 +1,10 @@
 package queue
 
 import . "../message"
-// import "container/heap"
+import "fmt"
+import "container/heap"
 
 type PriorityQueue []*Message
-
-
 
 func (pq PriorityQueue) Len() int {
 	return len(pq)
@@ -22,6 +21,8 @@ func (pq PriorityQueue) Swap(i, j int){
 func (pq PriorityQueue) Push(x interface{}){
 	item := x.(*Message)
 	pq = append(pq, item)
+	heap.Fix(pq, len(pq))
+	fmt.Println("Um push foi realizado", len(pq))
 }
 
 func (pq PriorityQueue) Pop() interface{}{
