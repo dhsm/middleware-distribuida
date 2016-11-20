@@ -6,10 +6,14 @@ import "container/heap"
 import "fmt"
 
 func main(){
-    msg := Message{"husadhusaid", 7,1}
-    msg2 := Message{"yolo", 37,2}
-    msg3 := Message{"olol", 5,3}
-    msg4 := Message{"kkkraiolaser", 96,4}
+    msg := Message{}
+    msg.CreateMessage("husadhusaid",7)
+    msg2 := Message{}
+    msg3 := Message{}
+    msg4 := Message{}
+    msg2.CreateMessage("yolo", 37000)
+    msg3.CreateMessage("olol", 5)
+    msg4.CreateMessage("kkkraiolaser", 96)
     pq := make(PriorityQueue, 1)
     pq[0] = &msg
     //pq[1] = &msg2

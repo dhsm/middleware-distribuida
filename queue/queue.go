@@ -12,7 +12,16 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].Priority < pq[j].Priority
+	x,y := int32(pq[i].Priority),int32(pq[j].Priority)
+	x_t, y_t := pq[i].TimeStamp,pq[j].TimeStamp
+
+	if(x -1 == 0){
+		x = -1
+	}
+	if(y -1 == 0){
+		y = -1
+	}
+	return x_t/x < y_t/y
 }
 
 func (pq PriorityQueue) Swap(i, j int){
