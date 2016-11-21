@@ -15,6 +15,6 @@ func (tpublisher *TopicPublisher) Publish(msg Message){
   tpublisher.MyTopic.AddMessage(msg)
 }
 
-func (tpublisher *TopicPublisher) GetTopic(){
+func (tpublisher *TopicPublisher) GetTopic() Topic{
   return tpublisher.MyTopic
 }

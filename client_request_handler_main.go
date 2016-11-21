@@ -9,7 +9,8 @@ func main(){
   crh := ClientRequestHandler{}
   crh.NewCRH("tcp", "127.0.0.1:8081", false)
 
-  msg := Message{"oi servidor", 99, 0}
+  msg := Message{}
+  msg.CreateMessage("oi servidor", 99)
 
   msgMarshaled, _ := json.Marshal(msg)
   fmt.Print("Total na mensagem a ser enviada")

@@ -17,3 +17,7 @@ func (msg *Message) CreateMessage(msgtext string, priority int){
   msg.Index = -1
   msg.TimeStamp = int32(time.Now().Unix())
 }
+
+func (msg *Message) GetText() string{
+  return msg.Msgtext
+}

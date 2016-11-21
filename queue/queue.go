@@ -5,8 +5,6 @@ import "container/heap"
 
 type PriorityQueue []*Message
 
-
-
 func (pq PriorityQueue) Len() int {
 	return len(pq)
 }

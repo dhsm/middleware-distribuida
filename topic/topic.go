@@ -18,3 +18,11 @@ func (tpc *Topic) CreateTopic(name string){
 func (tpc *Topic) AddMessage(msg Message){
   heap.Push(&tpc.Messages, &msg)
 }
+
+func (tpc *Topic) GetTopicName() string{
+  return tpc.Name
+}
+
+func (tpc *Topic) GetMessages() PriorityQueue{
+  return tpc.Messages
+}

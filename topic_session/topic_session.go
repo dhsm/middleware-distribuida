@@ -15,7 +15,7 @@ func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher{
   return tpublisher
 }
 
-func (tsession *TopicSession) CreateSubscriber(tpc Topic){
+func (tsession *TopicSession) CreateSubscriber(tpc Topic) TopicSubscriber{
   tsubscriber := TopicSubscriber{}
   tsubscriber.CreateTopicSubscriber(tpc)
   return tsubscriber
