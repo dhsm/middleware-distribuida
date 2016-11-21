@@ -1,59 +1,45 @@
 package client_request_handler
 
+import . "../packet"
 import "net"
-//import "bufio"
-import "errors"
-import . "../message"
 import "encoding/gob"
 import "log"
 
 type ClientRequestHandler struct {
 	Connection net.Conn
-	Async bool
 }
 
-func (crh *ClientRequestHandler) NewCRH(protocol string, address string, async bool){
-	//conn, err := net.Dial(protocol, address)
-	conn, _ := net.Dial(protocol, address)
-	crh.Connection = conn
-	crh.Async = async
+func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, bool isSubscriber, String clientID){
+	crh.Connection, _ = net.Dial(protocol, net.JoinHostPort(host, port))
 }
 
-func (crh ClientRequestHandler) Send(msg Message){
+func (crh ClientRequestHandler) Send(pkt Packet) error{
 	enc := gob.NewEncoder(crh.Connection)
-	err := enc.Encode(msg)
+	err := enc.Encode(pkt)
 	if (err != nil){
-		log.Fatal("Encoding error", err)
+		log.Fatal("Encoding error sending packet", err)
 	}
-	// j := int32(len(msg))
-	// buf := new(bytes.Buffer)
-	// err := binary.Write(buf, binary.BigEndian, j)
-	// if err != nil {
-	// 		fmt.Println(err)
-	// 		return
-	// }
-	//
-	// binary.Write(buf,binary.BigEndian, msg)
-	//
-	// crh.Connection.Write(buf)
-	// if (crh.Async){ //This is a async call and we don't need to keep the conection alive waiting for an answer
-	// 	crh.Connection.Close()
-	// }
+	return err
 }
 
-func (crh ClientRequestHandler) Receive () (Message, error){
-	if (crh.Async){ //If the call was async we are not expecting a response right away so a error will be issued
-		var msg Message
-		return msg, errors.New("Connection already closed!")
-	}
-	// bytes, _ := bufio.NewReader(crh.Connection).ReadBytes('\n')
-	// crh.Connection.Close()
-	// return bytes, nil
+func (crh ClientRequestHandler) Receive () (Packet, error){
+	var pkt Packet
 	dec := gob.NewDecoder(crh.Connection)
-  var msg Message
-  err := dec.Decode(&msg)
-  if (err != nil){
+	err := dec.Decode(&pkt)
+	if (err != nil){
 		log.Fatal("Decoding error", err)
 	}
-  return msg, nil
+	return pkt, err
+}
+
+func (crh ClientRequestHandler) SendType(bool isSubscriber, string clientID) {
+	pkt := Packet{}
+	msg := Message{}
+	params := []string{clientID}
+	if (isSubscriber){
+		pkt.CreatePacket(REGISTER_RECEIVER, 0, params, msg)	
+	}else{
+		pkt.CreatePacket(REGISTER_SENDER, 0, params, msg)	
+	}
+	crh.send(pkt)
 }

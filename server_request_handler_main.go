@@ -1,23 +1,24 @@
 package main
 
 import . "./message"
+import . "./packet"
 import . "./server_request_handler"
-//import "encoding/json"
 import "fmt"
 
 func main(){
   srh := ServerRequestHandler{}
   srh.NewSRH("tcp", "127.0.0.1:8081")
 
-  msgReceived := srh.Receive()
-  fmt.Println(msgReceived)
+  pktReceived := srh.Receive()
+  fmt.Println(pktReceived)
 
-  // _ = json.Unmarshal(bytes, &msgUnmarshaled)
-  // fmt.Print("mensagem recebida: ")
-  // fmt.Println(bytes)
-  // fmt.Println(msgUnmarshaled.Msgtext)
+  println("Creating response message...")
+  msg := Message{}
+  msg.CreateMessage("Hi Client", 99)
 
-  msg := Message{"oi cliente", 99, 0}
-  //msgMarshaled, _ := json.Marshal(msg)
-  srh.Send(msg)
+  println("Creating response packet...")
+  pkt := Packet{}
+  params := []string{}
+  pkt.CreatePacket(MESSAGE, 0, params, msg)
+  srh.Send(pkt)
 }
