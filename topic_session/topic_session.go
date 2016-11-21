@@ -2,6 +2,7 @@ package topic_session
 
 import . "../topic"
 import . "../topic_publisher"
+import . "../topic_subscriber"
 
 type TopicSession struct {
 
@@ -15,7 +16,9 @@ func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher{
 }
 
 func (tsession *TopicSession) CreateSubscriber(tpc Topic){
-
+  tsubscriber := TopicSubscriber{}
+  tsubscriber.CreateTopicSubscriber(tpc)
+  return tsubscriber
 }
 
 func (tsession *TopicSession) CreateTopic(topicname string) Topic{
