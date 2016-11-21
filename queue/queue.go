@@ -44,6 +44,10 @@ func (pq *PriorityQueue) Pop() interface{}{
 	return item
 }
 
+func (pq *PriorityQueue) PopMessage() *Message {
+	return pq.Pop().(*Message)
+}
+
 func (pq *PriorityQueue) update(msg *Message, msgtext string, priority int){
 	msg.Msgtext = msgtext
 	msg.Priority = priority

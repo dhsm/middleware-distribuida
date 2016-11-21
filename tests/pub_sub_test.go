@@ -32,7 +32,7 @@ func TestAddMessageToTopic(t *testing.T) {
   topic := Topic{}
   topic.CreateTopic("assunto")
   topic.AddMessage(msg)
-  msg_do_topico := topic.Messages.Pop().(*Message)
+  msg_do_topico := topic.Messages.PopMessage()
   msgtext := msg_do_topico.GetText()
   if msgtext != "mensagem sobre o assunto"{
     t.Error("Excpected mensagem sobre o assunto, got ",msgtext)
