@@ -9,16 +9,24 @@ type TopicSession struct {
 
 }
 
-func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher{
+func (tsession *TopicSession) CreatePublisherInternal(tpc Topic) interface{} {
   tpublisher := TopicPublisher{}
   tpublisher.CreateTopicPublisher(tpc)
   return tpublisher
 }
 
-func (tsession *TopicSession) CreateSubscriber(tpc Topic) TopicSubscriber{
+func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
+  return tsession.CreatePublisherInternal(tpc).(TopicPublisher)
+}
+
+func (tsession *TopicSession) CreateSubscriberInternal(tpc Topic) interface{} {
   tsubscriber := TopicSubscriber{}
   tsubscriber.CreateTopicSubscriber(tpc)
   return tsubscriber
+}
+
+func (tsession *TopicSession) CreateSubscriber(tpc Topic) TopicSubscriber {
+  return tsession.CreateSubscriberInternal(tpc).(TopicSubscriber)
 }
 
 func (tsession *TopicSession) CreateTopic(topicname string) Topic{
