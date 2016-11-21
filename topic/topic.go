@@ -30,3 +30,7 @@ func (tpc *Topic) AddSubscriber(clientId string){
 func (tpc *Topic) RemoveSubscriber(clientId string){
   //TODO implement for real
 }
+
+func (tpc *Topic) GetSubscribed() []string{
+  
+}
