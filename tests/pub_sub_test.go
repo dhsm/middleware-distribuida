@@ -3,9 +3,7 @@ package main
 import "testing"
 import . "../topic"
 import . "../message"
-//import . "../queue"
 import . "../topic_session"
-//import . "../topic_publisher"
 
 func TestCreateTopic(t *testing.T) {
   var topic Topic
@@ -72,7 +70,6 @@ func TestCreateSubscriber(t *testing.T) {
 
   topic_with_message := tpublisher.GetTopic()
 
-  topic = tsession.CreateTopic("meu_topico_legal")
   tsubscriber := tsession.CreateSubscriber(topic_with_message)
 
   topic_from_subscriber := tsubscriber.GetTopic()
@@ -80,5 +77,23 @@ func TestCreateSubscriber(t *testing.T) {
   message := queue.PopMessage()
   if message.GetText() != "mensagem da hora" {
     t.Error("Expected massa, got ",message)
+  }
+}
+
+func TestMessagePriority(t *testing.T) {
+  msg := Message{}
+  msg.CreateMessage("mensagem sobre o assunto",6)
+
+  msg2 := Message{}
+  msg2.CreateMessage("mensagem 2",7)
+
+  topic := Topic{}
+  topic.CreateTopic("assunto")
+  topic.AddMessage(msg)
+  topic.AddMessage(msg2)
+  msg_do_topico := topic.Messages.PopMessage()
+  msgtext := msg_do_topico.GetText()
+  if msgtext != "mensagem sobre o assunto" {
+    t.Error("Expected mensagem sobre o assunto, got ",msgtext)
   }
 }

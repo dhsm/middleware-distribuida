@@ -23,10 +23,10 @@ func (tpc *Topic) GetTopicName() string{
   return tpc.Name
 }
 
-func (tpc *Topic) GetMessagesInternal() interface{} {
-  return tpc.Messages
+func (tpc *Topic) GetMessages() PriorityQueue {
+	return tpc.getMessagesInternal().(PriorityQueue)
 }
 
-func (tpc *Topic) GetMessages() PriorityQueue {
-	return tpc.GetMessagesInternal().(PriorityQueue)
+func (tpc *Topic) getMessagesInternal() interface{} {
+  return tpc.Messages
 }
