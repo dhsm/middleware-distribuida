@@ -38,14 +38,31 @@ func TestAddMessageToTopic(t *testing.T) {
   }
 }
 
+func TestMessagePriority(t *testing.T) {
+  msg := Message{}
+  msg.CreateMessage("mensagem sobre o assunto",6)
+
+  msg2 := Message{}
+  msg2.CreateMessage("mensagem 2",7)
+
+  topic := Topic{}
+  topic.CreateTopic("assunto")
+  topic.AddMessage(msg)
+  topic.AddMessage(msg2)
+  msg_do_topico := topic.Messages.PopMessage()
+  msgtext := msg_do_topico.GetText()
+  if msgtext != "mensagem sobre o assunto" {
+    t.Error("Expected mensagem sobre o assunto, got ",msgtext)
+  }
+}
+
 func TestCreatePublisher(t *testing.T) {
   var topic Topic
   tsession := TopicSession{}
   topic = tsession.CreateTopic("meu_topico_massa")
   tpublisher := tsession.CreatePublisher(topic)
 
-  msg := Message{}
-  msg.CreateMessage("oi brasil", 99)
+  msg := tsession.CreateMessage("oi brasil",99)
 
   tpublisher.Publish(msg)
 
@@ -63,8 +80,7 @@ func TestCreateSubscriber(t *testing.T) {
   topic = tsession.CreateTopic("massa")
   tpublisher := tsession.CreatePublisher(topic)
 
-  msg := Message{}
-  msg.CreateMessage("mensagem da hora", 99)
+  msg := tsession.CreateMessage("mensagem da hora", 99)
 
   tpublisher.Publish(msg)
 
@@ -76,24 +92,6 @@ func TestCreateSubscriber(t *testing.T) {
   queue := topic_from_subscriber.GetMessages()
   message := queue.PopMessage()
   if message.GetText() != "mensagem da hora" {
-    t.Error("Expected massa, got ",message)
-  }
-}
-
-func TestMessagePriority(t *testing.T) {
-  msg := Message{}
-  msg.CreateMessage("mensagem sobre o assunto",6)
-
-  msg2 := Message{}
-  msg2.CreateMessage("mensagem 2",7)
-
-  topic := Topic{}
-  topic.CreateTopic("assunto")
-  topic.AddMessage(msg)
-  topic.AddMessage(msg2)
-  msg_do_topico := topic.Messages.PopMessage()
-  msgtext := msg_do_topico.GetText()
-  if msgtext != "mensagem sobre o assunto" {
-    t.Error("Expected mensagem sobre o assunto, got ",msgtext)
+    t.Error("Expected mensagem da hora, got ",message)
   }
 }

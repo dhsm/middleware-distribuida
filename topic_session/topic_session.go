@@ -1,6 +1,7 @@
 package topic_session
 
 import . "../topic"
+import . "../message"
 import . "../topic_publisher"
 import . "../topic_subscriber"
 
@@ -33,4 +34,10 @@ func (tsession *TopicSession) CreateTopic(topicname string) Topic{
   topic := Topic{}
   topic.CreateTopic(topicname)
   return topic
+}
+
+func (tsession *TopicSession) CreateMessage(msgtext string, priority int) Message{
+  msg := Message{}
+  msg.CreateMessage(msgtext, priority)
+  return msg
 }
