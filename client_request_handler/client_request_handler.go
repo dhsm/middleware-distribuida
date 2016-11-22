@@ -1,22 +1,29 @@
 package client_request_handler
 
+import "net"
+import "log"
+import "sync"
+import "io"
+import "encoding/json"
+import "encoding/gob"
+
 import . "../packet"
 import . "../message"
-import "net"
-import "encoding/gob"
-import "log"
 
 type ClientRequestHandler struct {
+	sync.Mutex
 	Connection net.Conn
 }
 
-func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
-	conn, err := net.Dial(protocol, net.JoinHostPort(host, port))
+type onPacketReceived func(pkt Packet)
 
+func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
+	gob.Register(Packet{})
+	conn, err := net.Dial(protocol, net.JoinHostPort(host, port))
 	crh.Connection = conn
 
 	if (err != nil){
-		log.Fatal("Error stablishing connection to: ", host, " at port ", port, " using ", protocol, " protocol.")
+		log.Print("Error stablishing connection to: ", host, " at port ", port, " using ", protocol, " protocol.")
 		return err
 	}
 
@@ -24,14 +31,14 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port strin
 	err = crh.SendType(isSubscriber, clientID)
 	
 	if (err != nil){
-		log.Fatal("Error when registering a Client Request Handler for client: ", clientID)
+		log.Print("Error when registering a Client Request Handler for client: ", clientID)
 		return err
 	}
 
 	crh.WaitAck(isSubscriber)
 
 	if (err != nil){
-		log.Fatal("Error when confirming registration of a Client Request Handler for client: ", clientID)
+		log.Print("Error when confirming registration of a Client Request Handler for client: ", clientID)
 		return err
 	}
 
@@ -39,26 +46,40 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port strin
 }
 
 func (crh ClientRequestHandler) Send(pkt Packet) error{
-	enc := gob.NewEncoder(crh.Connection)
-	err := enc.Encode(pkt)
+	crh.Lock()
+	encoded, err := json.Marshal(pkt)
+	encoded_size, err := json.Marshal(len(encoded))
+	crh.Connection.Write(encoded_size)
+	crh.Connection.Write(encoded)
+	crh.Unlock()
+
 	if (err != nil){
-		log.Fatal("Encoding error sending packet", err)
+		log.Print("Encoding error sending packet", err)
 	}
 	return err
 }
 
 func (crh ClientRequestHandler) Receive () (Packet, error){
 	var pkt Packet
-	dec := gob.NewDecoder(crh.Connection)
-	err := dec.Decode(&pkt)
-	if (err != nil){
-		log.Fatal("Decoding error", err)
-	}
-	return pkt, err
+	var masPktSize int64
+	
+	crh.Lock()
+	size := make([]byte, 3)
+	io.ReadFull(crh.Connection,size)
+	_ = json.Unmarshal(size, &masPktSize)
+	packetMsh := make([]byte, masPktSize)
+	io.ReadFull(crh.Connection,packetMsh)	
+	_ = json.Unmarshal(packetMsh, &pkt)
+	crh.Unlock()
+
+	return pkt, nil
 }
 
 func (crh ClientRequestHandler) SendAndReceive (pkt Packet) (Packet, error){
-	crh.Send(pkt)
+	err := crh.Send(pkt)
+	if (err != nil){
+		return Packet{}, nil
+	}
 	return crh.Receive()
 }
 
@@ -78,14 +99,59 @@ func (crh ClientRequestHandler) WaitAck(isSubscriber bool) error{
 	pkt, err := crh.Receive()
 
 	if (err != nil){
-		log.Fatal("Error receiving ACK", err)
+		log.Print("Error receiving ACK: ", err)
 	}
 
 	if((isSubscriber && pkt.GetType() == REGISTER_RECEIVER_ACK) || (!isSubscriber && pkt.GetType() == REGISTER_SENDER_ACK)){
 		return nil
 	}
 
-	log.Fatal("Ack for register not received")
+	log.Print("Ack for register not received")
 
 	return err
 }
+
+func (crh ClientRequestHandler) Close() error{
+	crh.Lock()
+	err := crh.Connection.Close()
+	crh.Unlock()
+	if (err != nil){
+		log.Print("Erro closing connection. ", err)
+	}
+
+	return err
+}
+
+func (crh ClientRequestHandler) SendAsync(pkt Packet){
+	go func (){
+		crh.Lock()
+		enc := gob.NewEncoder(crh.Connection)
+		err := enc.Encode(pkt)
+		crh.Unlock()
+
+		if (err != nil){
+			log.Print("Encoding error sending packet: ", err)
+		}
+	}()
+}
+
+func (crh ClientRequestHandler) ListenIncomingPackets(listener onPacketReceived){
+	go func () {
+		var run = true
+		for run{
+			pkt, err := crh.Receive()
+			
+			if (err!=nil){
+				run = false
+				continue
+			}
+
+			crh.Lock()
+			listener(pkt)
+			crh.Unlock()
+		}
+	}()
+}
+
+
+

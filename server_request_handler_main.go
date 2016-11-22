@@ -4,6 +4,7 @@ import . "./message"
 import . "./packet"
 import . "./server_request_handler"
 import "fmt"
+import "time"
 
 func main(){
   srh := ServerRequestHandler{}
@@ -32,4 +33,11 @@ func main(){
   msg.CreateMessage("Hi Client", 99)
   pkt.CreatePacket(MESSAGE, 0, params, msg)
   srh.Send(pkt)
+
+  time.Sleep(time.Second * 5)
+
+  for i := 0;; i++ {
+    pkt.CreatePacket(MESSAGE, uint(i), params, msg)
+    srh.Send(pkt)
+  }
 }

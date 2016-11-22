@@ -1,13 +1,11 @@
 package server_request_handler
 
 import "net"
-//import "bufio"
-// import "fmt"
-// import "io"
-// import "bytes"
-import "encoding/gob"
-import . "../packet"
 import "log"
+import "io"
+import "encoding/json"
+
+import . "../packet"
 
 type ServerRequestHandler struct{
   Listen net.Listener
@@ -23,19 +21,25 @@ func (srh *ServerRequestHandler) NewSRH(protocol string, port string){
 }
 
 func (srh ServerRequestHandler) Send(pkt Packet) {
-  enc := gob.NewEncoder(srh.Connection)
-	err := enc.Encode(pkt)
+  encoded, err := json.Marshal(pkt)
+  encoded_size, err := json.Marshal(len(encoded))
+  srh.Connection.Write(encoded_size)
+  srh.Connection.Write(encoded)
 	if (err != nil){
 		log.Fatal("Encoding error", err)
 	}
 }
 
 func (srh *ServerRequestHandler) Receive() Packet {
-  dec := gob.NewDecoder(srh.Connection)
   var pkt Packet
-  err := dec.Decode(&pkt)
-  if (err != nil){
-		log.Fatal("Decoding error", err)
-	}
+  var masPktSize int64
+
+  size := make([]byte, 3)
+  io.ReadFull(srh.Connection,size)
+  _ = json.Unmarshal(size, &masPktSize)
+  packetMsh := make([]byte, masPktSize)
+  io.ReadFull(srh.Connection,packetMsh) 
+  _ = json.Unmarshal(packetMsh, &pkt)
+
   return pkt
 }
