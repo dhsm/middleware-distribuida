@@ -24,7 +24,7 @@ func main(){
     heap.Push(&pq, &msg2)
     heap.Push(&pq, &msg3)
     heap.Push(&pq, &msg4)
-    fmt.Println("precisa ser olol")
+    fmt.Println("precisa ser yolo")
     msgPop := heap.Pop(&pq).(*Message)
     fmt.Println(msgPop.Msgtext)
 }

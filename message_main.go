@@ -5,7 +5,8 @@ import "fmt"
 import "encoding/json"
 
 func main(){
-  msg := Message{"oi brasil"}
+  msg := Message{}
+  msg.CreateMessage("oi brasil",0)
 
   fmt.Println(msg)
   //If all is well, err will be nil and b will be a []byte containing this JSON data
