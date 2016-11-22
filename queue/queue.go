@@ -33,7 +33,7 @@ func (pq *PriorityQueue) Push(x interface{}){
 	item := x.(*Message)
 	item.Index = n
 	*pq = append(*pq, item)
-	values, err := trigger.Fire("message-arrived", pq.Pop()) 
+	//values, err := trigger.Fire("message-arrived", pq.Pop()) 
 }
 
 func (pq *PriorityQueue) Pop() interface{}{

@@ -12,7 +12,7 @@ func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic){
 }
 
 func (tpublisher *TopicPublisher) Publish(msg Message){
-  tpublisher.MyTopic.AddMessage(msg)
+  //Call connection to send
 }
 
 func (tpublisher *TopicPublisher) GetTopic() Topic{

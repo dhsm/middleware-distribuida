@@ -1,9 +1,5 @@
 package topic
 
-import . "../message"
-import . "../queue"
-import "container/heap"
-
 type Topic struct {
   Name string
 }
