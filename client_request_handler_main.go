@@ -8,7 +8,7 @@ import "fmt"
 func main(){
   println("Starting Client Request Handler...")
   crh := ClientRequestHandler{}
-  crh.NewCRH("tcp", "127.0.0.1", "8081")
+  crh.NewCRH("tcp", "127.0.0.1", "8081", false, "JKDASBDK088a1asd")
 
   println("Creating message...")
   msg := Message{}

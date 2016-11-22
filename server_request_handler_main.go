@@ -12,13 +12,24 @@ func main(){
   pktReceived := srh.Receive()
   fmt.Println(pktReceived)
 
-  println("Creating response message...")
+  
   msg := Message{}
-  msg.CreateMessage("Hi Client", 99)
 
   println("Creating response packet...")
   pkt := Packet{}
   params := []string{}
+  if(pktReceived.GetType() == REGISTER_SENDER){
+    pkt.CreatePacket(REGISTER_SENDER_ACK, 0, params, msg)  
+  }else if(pktReceived.GetType() == REGISTER_RECEIVER){
+    pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, msg)  
+  }else{
+    pkt.CreatePacket(MESSAGE, 0, params, msg)
+  }
+  srh.Send(pkt)
+
+  pktReceived = srh.Receive()
+  println("Creating response message...")
+  msg.CreateMessage("Hi Client", 99)
   pkt.CreatePacket(MESSAGE, 0, params, msg)
   srh.Send(pkt)
 }

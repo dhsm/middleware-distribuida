@@ -113,3 +113,7 @@ func (pkt *Packet) GetHeader() PacketHeader{
 func (pkt *Packet) SetHeader(header PacketHeader){
 	pkt.Header = header
 }
+
+func (pkt *Packet) GetType() Operation{
+	return pkt.Header.Operation
+}
