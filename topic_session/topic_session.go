@@ -4,10 +4,12 @@ import . "../topic"
 import . "../message"
 import . "../topic_publisher"
 import . "../topic_subscriber"
+import . "../connection_consumer"
 
 type TopicSession struct {
-
-
+  SubscribedList string[[]MessageListener]
+  MyConnectionSendMessage Connection
+  MyMessageListener MessageListener
 }
 
 func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
@@ -17,6 +19,13 @@ func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
 func (tsession *TopicSession) createPublisherInternal(tpc Topic) interface{} {
   tpublisher := TopicPublisher{}
   tpublisher.CreateTopicPublisher(tpc)
+
+  tsession.MyConnectionSendMessage.Subscribe(tpc, tsession)
+  //TODO
+  list_of_subscribers_of_this_topic := tsession.SubscibedList.get(tpc.GetName)
+  list_of_subscribers_of_this_topic.append(tpublisher)
+  tsession.SubscribedList.append(tpc.GetName(),list_of_subscribers_of_this_topic)
+
   return tpublisher
 }
 
