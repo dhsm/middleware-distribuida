@@ -1,35 +1,48 @@
 package main
 
 import . "./message"
-import "encoding/json"
+import . "./packet"
 import . "./client_request_handler"
 import "fmt"
+import "time"
+
+func printReceivedPackets(pkt Packet){
+  fmt.Println(pkt)
+}
 
 func main(){
+  println("Starting Client Request Handler...")
   crh := ClientRequestHandler{}
-  crh.NewCRH("tcp", "127.0.0.1:8081", false)
+  err := crh.NewCRH("tcp", "127.0.0.1", "8081", false, "JKDASBDK088a1asd")
 
+  if (err != nil){
+    return
+  }
+
+  println("Creating message...")
   msg := Message{}
-  msg.CreateMessage("oi servidor", 99)
+  msg.CreateMessage("Hi Server!", 99)
+  
+  println("Creating packet...")
+  pkt := Packet{}
+  params := []string{"arg0", "arg1", "arg2"}
+  pkt.CreatePacket(MESSAGE, 0, params, msg)
 
-  msgMarshaled, _ := json.Marshal(msg)
-  fmt.Print("Total na mensagem a ser enviada")
-  fmt.Println(len(msgMarshaled))
-  fmt.Print("Mensagem marshaled")
-  fmt.Println(msgMarshaled)
-  fmt.Println(msg.Msgtext)
+  // crh.SendAsync(pkt)
+  // time.Sleep(time.Second)
+  // crh.SendAsync(pkt)
 
-  crh.Send(msg)
-
-  var msgReceived Message
-  msgReceived, err := crh.Receive()
+  var pktReceived Packet
+  pktReceived, err = crh.SendAndReceive(pkt)
   if(err != nil){
     fmt.Println(err)
   }
-  fmt.Print("bytes da mensagem recebida: ")
-  fmt.Println(msgReceived)
-  // var msgUnmarshaled Message
-  // _ = json.Unmarshal(msgReceived, &msgUnmarshaled)
-  // fmt.Print("mensagem recebida: ")
-  // fmt.Println(msgUnmarshaled)
+  fmt.Print("Packet received:")
+  fmt.Println(pktReceived)
+  crh.SendAsync(pkt)
+  crh.SendAsync(pkt)
+  crh.SendAsync(pkt)
+  crh.ListenIncomingPackets(printReceivedPackets)
+  println("Waiting 20 before end execution...")
+  time.Sleep(time.Second * 20)
 }

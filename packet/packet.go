@@ -3,9 +3,9 @@ package packet
 import . "../message"
 
 type Enum interface {
-	name() string
-	ordinal() int
-	valueOf() *[]string
+	Name() string
+	Ordinal() int
+	ValueOf() *[]string
 }
 
 type Operation uint
@@ -32,17 +32,17 @@ var operations = []string{
 	"MESSAGE",
 	"ACK"}
 
-func (op Operation) name() string {
+func (op Operation) Name() string {
 	return operations[op]
 }
-func (op Operation) ordinal() uint {
+func (op Operation) Ordinal() uint {
 	return uint(op)
 }
 func (op Operation) String() string {
 	return operations[op]
 }
 
-func (op Operation) values() *[]string {
+func (op Operation) Values() *[]string {
 	return &operations
 }
 
@@ -51,19 +51,19 @@ type PacketHeader struct{
 	Id uint
 }
 
-func (ph *PacketHeader) getOperation() Operation{
+func (ph *PacketHeader) GetOperation() Operation{
 	return ph.Operation
 }
 
-func (ph *PacketHeader) setOperation(operation Operation){
+func (ph *PacketHeader) SetOperation(operation Operation){
 	ph.Operation = operation
 }
 
-func (ph *PacketHeader) getId() uint{
+func (ph *PacketHeader) GetId() uint{
 	return ph.Id
 }
 
-func (ph *PacketHeader) setId(id uint){
+func (ph *PacketHeader) SetId(id uint){
 	ph.Id = id
 }
 
@@ -72,19 +72,19 @@ type PacketBody struct{
 	Msg Message
 }
 
-func (pb *PacketBody) getMessage() Message{
+func (pb *PacketBody) GetMessage() Message{
 	return pb.Msg
 }
 
-func (pb *PacketBody) setMessage(msg Message){
+func (pb *PacketBody) SetMessage(msg Message){
 	pb.Msg = msg
 }
 
-func (pb *PacketBody) getParams() []string{
+func (pb *PacketBody) GetParams() []string{
 	return pb.Params
 }
 
-func (pb *PacketBody) setParams(params []string){
+func (pb *PacketBody) SetParams(params []string){
 	pb.Params = params
 }
 
@@ -98,18 +98,22 @@ func (pkt *Packet) CreatePacket(op Operation, id uint, params []string, msg Mess
   pkt.Body = PacketBody{params, msg}
 }
 
-func (pkt *Packet) getBody() PacketBody{
+func (pkt *Packet) GetBody() PacketBody{
 	return pkt.Body
 }
 
-func (pkt *Packet) setBody(body PacketBody){
+func (pkt *Packet) SetBody(body PacketBody){
 	pkt.Body = body
 }
 
-func (pkt *Packet) getHeader() PacketHeader{
+func (pkt *Packet) GetHeader() PacketHeader{
 	return pkt.Header
 }
 
-func (pkt *Packet) setHeader(header PacketHeader){
+func (pkt *Packet) SetHeader(header PacketHeader){
 	pkt.Header = header
+}
+
+func (pkt *Packet) GetType() Operation{
+	return pkt.Header.Operation
 }

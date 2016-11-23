@@ -1,13 +1,11 @@
 package server_request_handler
 
 import "net"
-//import "bufio"
-// import "fmt"
-// import "io"
-// import "bytes"
-import "encoding/gob"
-import . "../message"
 import "log"
+import "io"
+import "encoding/json"
+
+import . "../packet"
 
 type ServerRequestHandler struct{
   Listen net.Listener
@@ -22,42 +20,26 @@ func (srh *ServerRequestHandler) NewSRH(protocol string, port string){
   srh.Connection = conn
 }
 
-func (srh ServerRequestHandler) Send(msg Message) {
-  enc := gob.NewEncoder(srh.Connection)
-	err := enc.Encode(msg)
+func (srh ServerRequestHandler) Send(pkt Packet) {
+  encoded, err := json.Marshal(pkt)
+  encoded_size, err := json.Marshal(len(encoded))
+  srh.Connection.Write(encoded_size)
+  srh.Connection.Write(encoded)
 	if (err != nil){
 		log.Fatal("Encoding error", err)
 	}
 }
 
-func (srh *ServerRequestHandler) Receive() Message {
-  dec := gob.NewDecoder(srh.Connection)
-  var msg Message
-  err := dec.Decode(&msg)
-  if (err != nil){
-		log.Fatal("Decoding error", err)
-	}
-  return msg
-  // result :=
-  // p := make([]byte, 25)
-  //
-  // buf := new(bytes.Buffer)
-  // //var k int32
-  // _, _ := io.ReadFull(srh.Connection,buf)
-  // fmt.Println(buf)
-  //
-  // var size int32
-  // buf := bytes.NewReader()
-  // err = binary.Read(buf, binary.BigEndian, &size)
-  // if err != nil {
-  //     fmt.Println(err)
-  //     return
-  // }
-  //
-  // fmt.Println(size)
-  //
-  // p := make([]byte, 49)
-  // _, _ = io.ReadFull(srh.Connection,p)
-  // return p
+func (srh *ServerRequestHandler) Receive() Packet {
+  var pkt Packet
+  var masPktSize int64
 
+  size := make([]byte, 3)
+  io.ReadFull(srh.Connection,size)
+  _ = json.Unmarshal(size, &masPktSize)
+  packetMsh := make([]byte, masPktSize)
+  io.ReadFull(srh.Connection,packetMsh) 
+  _ = json.Unmarshal(packetMsh, &pkt)
+
+  return pkt
 }
