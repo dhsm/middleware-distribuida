@@ -1,14 +1,16 @@
-package topic
+package middleware
 
 import . "../message"
+import . "../message_listener"
 // import . "../topic_session"
 
 type TopicPublisher struct {
   MyTopic Topic
-  SessionSend TopicSession
+  SessionSend *TopicSession
+  MessageListener MessageListener
 }
 
-func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic, session TopicSession){
+func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic, session *TopicSession){
   tpublisher.MyTopic = topic
   tpublisher.SessionSend = session
 }

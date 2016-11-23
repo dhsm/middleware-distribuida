@@ -1,8 +1,7 @@
 package main
 
 import "testing"
-import . "../topic"
-import . "../message"
+import . "../middleware"
 
 func TestCreateTopicOld(t *testing.T) {
   var topic Topic

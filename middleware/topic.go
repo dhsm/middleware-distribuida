@@ -1,4 +1,4 @@
-package topic
+package middleware
 
 type Topic struct {
   Name string

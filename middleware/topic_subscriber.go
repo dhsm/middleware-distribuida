@@ -1,13 +1,13 @@
-package topic
+package middleware
 
  import . "../message"
 
 type TopicSubscriber struct{
   MyTopic Topic
-  SessionReceive interface{}
+  SessionReceive *TopicSession
 }
 
-func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic, session TopicSession){
+func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic, session *TopicSession){
   tsubscriber.MyTopic = topic
   tsubscriber.SessionReceive = session
 }

@@ -1,4 +1,4 @@
-package connection
+package middleware
 
 import "sync"
 import "math"
@@ -12,8 +12,7 @@ import . "../packet"
 import . "../message"
 import . "../client_request_handler"
 // import . "../server_request_handler"
-import . "../topic_session"
-import . "../topic"
+//import . "../topic"
 
 type SubscribedSafe struct{
 	sync.Mutex
