@@ -11,3 +11,7 @@ func (tpc *Topic) CreateTopic(name string){
 func (tpc *Topic) GetTopicName() string{
   return tpc.Name
 }
+
+func (tpc *Topic) RemoveSubscriber(clientId string){
+  //TODO implement for real
+}

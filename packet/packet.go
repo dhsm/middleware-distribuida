@@ -1,5 +1,7 @@
 package packet
 
+import "time"
+
 import . "../message"
 
 type Enum interface {
@@ -46,74 +48,56 @@ func (op Operation) Values() *[]string {
 	return &operations
 }
 
-type PacketHeader struct{
+type Packet struct{
 	Operation Operation
-	Id uint
-}
-
-func (ph *PacketHeader) GetOperation() Operation{
-	return ph.Operation
-}
-
-func (ph *PacketHeader) SetOperation(operation Operation){
-	ph.Operation = operation
-}
-
-func (ph *PacketHeader) GetId() uint{
-	return ph.Id
-}
-
-func (ph *PacketHeader) SetId(id uint){
-	ph.Id = id
-}
-
-type PacketBody struct{
+	ID uint
 	Params []string
 	Msg Message
-}
-
-func (pb *PacketBody) GetMessage() Message{
-	return pb.Msg
-}
-
-func (pb *PacketBody) SetMessage(msg Message){
-	pb.Msg = msg
-}
-
-func (pb *PacketBody) GetParams() []string{
-	return pb.Params
-}
-
-func (pb *PacketBody) SetParams(params []string){
-	pb.Params = params
-}
-
-type Packet struct{
-  Header PacketHeader
-  Body PacketBody
+	TimeStamp int32
+	Index int //This is necessary because we are using a PriorityQueue
 }
 
 func (pkt *Packet) CreatePacket(op Operation, id uint, params []string, msg Message){
-  pkt.Header = PacketHeader{op, id}
-  pkt.Body = PacketBody{params, msg}
+	pkt.Operation = op
+	pkt.ID = id
+	pkt.Params = params
+	pkt.Msg = msg
+	pkt.Index = -1
+	pkt.TimeStamp = int32(time.Now().Unix())
 }
 
-func (pkt *Packet) GetBody() PacketBody{
-	return pkt.Body
+func (pkt *Packet) GetOperation() Operation{
+	return pkt.Operation
 }
 
-func (pkt *Packet) SetBody(body PacketBody){
-	pkt.Body = body
+func (pkt *Packet) SetOperation(operation Operation){
+	pkt.Operation = operation
 }
 
-func (pkt *Packet) GetHeader() PacketHeader{
-	return pkt.Header
+func (pkt *Packet) GetID() uint{
+	return pkt.ID
 }
 
-func (pkt *Packet) SetHeader(header PacketHeader){
-	pkt.Header = header
+func (pkt *Packet) SetID(id uint){
+	pkt.ID = id
 }
 
 func (pkt *Packet) GetType() Operation{
-	return pkt.Header.Operation
+	return pkt.Operation
+}
+
+func (pkt *Packet) GetMessage() Message{
+	return pkt.Msg
+}
+
+func (pkt *Packet) SetMessage(msg Message){
+	pkt.Msg = msg
+}
+
+func (pkt *Packet) GetParams() []string{
+	return pkt.Params
+}
+
+func (pkt *Packet) SetParams(params []string){
+	pkt.Params = params
 }
