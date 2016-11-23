@@ -2,14 +2,16 @@ package topic_subscriber
 
 import . "../topic"
 import . "../message"
+import . "../session"
 
 type TopicSubscriber struct{
   MyTopic Topic
-  //MessageListener object
+  SessionReceive Session
 }
 
-func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic){
+func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic, session Session){
   tsubscriber.MyTopic = topic
+  tsubscriber.SessionReceive = session
 }
 
 func (tsubscriber *TopicSubscriber) GetTopic() Topic{
@@ -17,9 +19,5 @@ func (tsubscriber *TopicSubscriber) GetTopic() Topic{
 }
 
 func (tsubscriber *TopicSubscriber) OnMessage() Message {
-  //TODO
-  //Returns the message
-  msg := Message{}
-  msg.CreateMessage("oi",99)
-  return msg
+  //TODO check if this method really exists here
 }

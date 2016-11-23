@@ -23,7 +23,7 @@ func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
 
 func (tsession *TopicSession) createPublisherInternal(tpc Topic) interface{} {
   tpublisher := TopicPublisher{}
-  tpublisher.CreateTopicPublisher(tpc)
+  tpublisher.CreateTopicPublisher(tpc, tsession)
 
   return tpublisher
 }
@@ -63,4 +63,8 @@ func (tsession *TopicSession) CreateMessage(msgtext string, priority int) Messag
   msg := Message{}
   msg.CreateMessage(msgtext, priority)
   return msg
+}
+
+func (tsession *TopicSession) Send(msg Message) {
+  tsession.MyConnectionSendMessage.send(msg)
 }
