@@ -13,8 +13,9 @@ type TopicSession struct {
   MyMessageListener OutputStream
 }
 
-func (tsession *TopicSession) CreateSession() {
+func (tsession *TopicSession) CreateSession(conn Connection) {
   tsession.SubscribedList = make(map[string][]OutputStream)
+  tsession.MyConnectionSendMessage = conn
 }
 
 func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
