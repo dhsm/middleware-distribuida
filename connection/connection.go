@@ -32,4 +32,3 @@ func (cnn *Connection) GetInputStream() <-chan Message{
 func (cnn *Connection) GetOutputStream() chan<- Message{
 	return cnn.OutputStream
 }
->>>>>>> a36972906546bd3ed359de998c89dbc6a86bff60
