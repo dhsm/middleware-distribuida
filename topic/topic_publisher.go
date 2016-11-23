@@ -1,15 +1,14 @@
-package topic_publisher
+package topic
 
-import . "../topic"
 import . "../message"
 // import . "../topic_session"
 
 type TopicPublisher struct {
   MyTopic Topic
-  SessionSend Session
+  SessionSend TopicSession
 }
 
-func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic, session Session){
+func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic, session TopicSession){
   tpublisher.MyTopic = topic
   tpublisher.SessionSend = session
 }

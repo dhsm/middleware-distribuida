@@ -1,11 +1,11 @@
-package topic_session
+package topic
 
 import "sync"
 //import . "../topic"
 //import . "../message"
 import . "../message_listener"
-import . "../topic_publisher"
-import . "../topic_subscriber"
+//import . "../topic_publisher"
+//import . "../topic_subscriber"
 import . "../connection"
 
 type TopicSession struct {

@@ -1,15 +1,13 @@
-package topic_subscriber
+package topic
 
-import . "../topic"
-// import . "../message"
-import . "../topic_session"
+ import . "../message"
 
 type TopicSubscriber struct{
   MyTopic Topic
-  SessionReceive Session
+  SessionReceive interface{}
 }
 
-func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic, session Session){
+func (tsubscriber *TopicSubscriber) CreateTopicSubscriber(topic Topic, session TopicSession){
   tsubscriber.MyTopic = topic
   tsubscriber.SessionReceive = session
 }
@@ -20,4 +18,5 @@ func (tsubscriber *TopicSubscriber) GetTopic() Topic{
 
 func (tsubscriber *TopicSubscriber) OnMessage(msg Message) Message {
   //TODO check if this method really exists here
+  return msg
 }

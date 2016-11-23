@@ -2,7 +2,6 @@ package main
 
 import "testing"
 import . "../topic"
-import . "../topic_session"
 
 func TestCreateTopic(t *testing.T) {
   var topic Topic

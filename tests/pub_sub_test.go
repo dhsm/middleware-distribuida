@@ -1,19 +1,18 @@
 package main
 
-// import "testing"
-// import . "../topic"
-// import . "../message"
-// import . "../topic_session"
-//
-// func TestCreateTopicOld(t *testing.T) {
-//   var topic Topic
-//   tsession := TopicSession{}
-//   topic = tsession.CreateTopic("meu_topico_massa")
-//   topicname := topic.GetTopicName()
-//   if topicname != "meu_topico_massa" {
-//     t.Error("Expected meu_topico_massa, got ", topicname)
-//   }
-// }
+import "testing"
+import . "../topic"
+import . "../message"
+
+func TestCreateTopicOld(t *testing.T) {
+  var topic Topic
+  tsession := TopicSession{}
+  topic = tsession.CreateTopic("meu_topico_massa")
+  topicname := topic.GetTopicName()
+  if topicname != "meu_topico_massa" {
+    t.Error("Expected meu_topico_massa, got ", topicname)
+  }
+}
 //
 // func TestCreateMessage(t *testing.T) {
 //   msg := Message{}
