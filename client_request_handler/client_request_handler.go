@@ -10,13 +10,14 @@ import "encoding/gob"
 import . "../packet"
 import . "../message"
 
+type OnPacketReceived func(pkt Packet)
+
 type ClientRequestHandler struct {
 	sync.Mutex
 	Connection net.Conn
 	Closed bool
+	OnMessage OnPacketReceived
 }
-
-type onPacketReceived func(pkt Packet)
 
 func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
 	gob.Register(Packet{})
@@ -140,7 +141,7 @@ func (crh ClientRequestHandler) SendAsync(pkt Packet){
 	}()
 }
 
-func (crh ClientRequestHandler) ListenIncomingPackets(listener onPacketReceived){
+func (crh ClientRequestHandler) ListenIncomingPackets(){
 	go func () {
 		for !crh.Closed{
 			pkt, err := crh.Receive()
@@ -149,11 +150,23 @@ func (crh ClientRequestHandler) ListenIncomingPackets(listener onPacketReceived)
 				crh.Closed = true
 			}else{
 				crh.Lock()
-				listener(pkt)
+				crh.OnMessage(pkt)
 				crh.Unlock()
 			}
 		}
 	}()
+}
+
+func (crh ClientRequestHandler) SetConnection(connection net.Conn){
+	crh.Lock()
+	crh.Connection = connection
+	crh.Unlock()
+}
+
+func (crh ClientRequestHandler) SetOnMessage(listener OnPacketReceived){
+	crh.Lock()
+	crh.OnMessage = listener
+	crh.Unlock()
 }
 
 

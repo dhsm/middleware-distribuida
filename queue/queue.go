@@ -1,18 +1,16 @@
 package queue
 
-import . "../message"
+import . "../packet"
 import "container/heap"
 
-type PriorityQueue []*Message
-
-
+type PriorityQueue []*Packet
 
 func (pq PriorityQueue) Len() int {
 	return len(pq)
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	x,y := int32(pq[i].Priority),int32(pq[j].Priority)
+	x,y := int32(pq[i].Msg.Priority),int32(pq[j].Msg.Priority)
 	x_t, y_t := pq[i].TimeStamp,pq[j].TimeStamp
 
 	if(x -1 == 0){
@@ -32,7 +30,7 @@ func (pq PriorityQueue) Swap(i, j int){
 
 func (pq *PriorityQueue) Push(x interface{}){
 	n := len(*pq)
-	item := x.(*Message)
+	item := x.(*Packet)
 	item.Index = n
 	*pq = append(*pq, item)
 }
@@ -46,8 +44,8 @@ func (pq *PriorityQueue) Pop() interface{}{
 	return item
 }
 
-func (pq *PriorityQueue) update(msg *Message, msgtext string, priority int){
-	msg.Msgtext = msgtext
-	msg.Priority = priority
-	heap.Fix(pq, msg.Index)
+func (pq *PriorityQueue) update(pkt *Packet, msgtext string, priority int){
+	pkt.Msg.MsgText = msgtext
+	pkt.Msg.Priority = priority
+	heap.Fix(pq, pkt.Index)
 }

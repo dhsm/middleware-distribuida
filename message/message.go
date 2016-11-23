@@ -1,19 +1,19 @@
 package message
 
-import "time"
-
 //Good source to learn why the variable name has a capital letter https://www.goinggo.net/2014/03/exportedunexported-identifiers-in-go.html
 
 type Message struct {
-  Msgtext string
+  MsgText string
   Priority int
-  Index int //This is necessary because we are using a PriorityQueue
-  TimeStamp int32
+  Destination string
+  MessageID string
+  Redelivery bool
 }
 
-func (msg *Message) CreateMessage(msgtext string, priority int){
-  msg.Msgtext = msgtext
+func (msg *Message) CreateMessage(msgtext string, destination string, priority int, messageid string){
+  msg.MsgText = msgtext
   msg.Priority = priority
-  msg.Index = -1
-  msg.TimeStamp = int32(time.Now().Unix())
+  msg.Destination = destination
+  msg.MessageID = messageid
+  msg.Redelivery = false
 }
