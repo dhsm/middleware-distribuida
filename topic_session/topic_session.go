@@ -1,16 +1,17 @@
 package topic_session
 
+import "sync"
 import . "../topic"
 import . "../message"
+import . "../message_listener"
 import . "../topic_publisher"
 import . "../topic_subscriber"
 import . "../connection"
 
 type TopicSession struct {
-  //TODO check if MessageListener type is really OutputStream
-  SubscribedList map[string][]OutputStream
+  SubscribedList SubscribedSafe
   MyConnectionSendMessage Connection
-  MyMessageListener OutputStream
+  MyMessageListener MessageLister
 }
 
 func (tsession *TopicSession) CreateSession(conn Connection) {
@@ -57,6 +58,7 @@ func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
 func (tsession *TopicSession) CreateTopic(topicname string) Topic{
   topic := Topic{}
   topic.CreateTopic(topicname)
+  tsession.MyConnectionSendMessage.CreateTopic(topic)
   return topic
 }
 
@@ -64,6 +66,19 @@ func (tsession *TopicSession) CreateMessage(msgtext string, priority int) Messag
   msg := Message{}
   msg.CreateMessage(msgtext, priority)
   return msg
+}
+
+func (tsession *TopicSession) onMessageReceived(msg Message) {
+  //TODO check if msg really is the object that has SessionAck
+  msg.SetSessionAck(tsession)
+  topic := msg.GetTopic()
+  var mu sync.Mutex
+  mu.Lock()
+    subscribed_list := tsession.SubscribedList[topic.GetTopicName()]
+    for _, subscriber := range subscribed_list {
+        subscriber.onMessage(msg)
+    }
+  mu.Unlock()
 }
 
 func (tsession *TopicSession) Send(msg Message) {
