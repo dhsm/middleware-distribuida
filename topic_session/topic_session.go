@@ -40,17 +40,21 @@ func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
 
   tsession.MyConnectionSendMessage.Subscribe(tpc, tsession)
 
-  subscribed_list := tsession.SubscribedList
-  list_of_subscribers_of_this_topic := subscribed_list[tpc.GetName()]
+  var mu sync.Mutex
 
-  if list_of_subscribers_of_this_topic == nil {
-    var list []OutputStream
-    list = make([]OutputStream, tsubscriber)
-    list_of_subscribers_of_this_topic = list
-  }else{
-    list_of_subscribers_of_this_topic.append(tsubscriber)
-  }
-  tsession.SubscribedList[tpc.GetName()] = list_of_subscribers_of_this_topic
+  mu.Lock()
+    subscribed_list := tsession.SubscribedList
+    list_of_subscribers_of_this_topic := subscribed_list[tpc.GetName()]
+
+    if list_of_subscribers_of_this_topic == nil {
+      var list []OutputStream
+      list = make([]OutputStream, tsubscriber)
+      list_of_subscribers_of_this_topic = list
+    }else{
+      list_of_subscribers_of_this_topic.append(tsubscriber)
+    }
+    tsession.SubscribedList[tpc.GetName()] = list_of_subscribers_of_this_topic
+  mu.Unlock()
 
   return tsubscriber
 }
@@ -68,7 +72,7 @@ func (tsession *TopicSession) CreateMessage(msgtext string, priority int) Messag
   return msg
 }
 
-func (tsession *TopicSession) onMessageReceived(msg Message) {
+func (tsession *TopicSession) OnMessageReceived(msg Message) {
   //TODO check if msg really is the object that has SessionAck
   msg.SetSessionAck(tsession)
   topic := msg.GetTopic()
@@ -82,5 +86,20 @@ func (tsession *TopicSession) onMessageReceived(msg Message) {
 }
 
 func (tsession *TopicSession) Send(msg Message) {
-  tsession.MyConnectionSendMessage.send(msg)
+  tsession.MyConnectionSendMessage.Send(msg)
+}
+
+func (tsession *TopicSession) CloseSubscriber(publisher TopicPublisher){
+  topic := publisher.GetTopic()
+  var mu sync.Mutex
+  mu.Lock()
+    subscribers := tsession.SubscribedList[topic.GetTopicName()]
+    delete(subscribers, publisher)
+    if len(subscribers) == 0 {
+      tsession.Unsubscribe(topic.GetTopicName())
+    }
+}
+
+func (tsession *TopicSession) Unsubscribe(topic_name string) {
+  tsession.MyConnectionSendMessage.Unsubscribe(topic_name)
 }

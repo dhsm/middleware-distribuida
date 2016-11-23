@@ -18,6 +18,6 @@ func (tsubscriber *TopicSubscriber) GetTopic() Topic{
   return tsubscriber.MyTopic
 }
 
-func (tsubscriber *TopicSubscriber) OnMessage() Message {
+func (tsubscriber *TopicSubscriber) OnMessage(msg Message) Message {
   //TODO check if this method really exists here
 }
