@@ -4,12 +4,17 @@ import . "../topic"
 import . "../message"
 import . "../topic_publisher"
 import . "../topic_subscriber"
-import . "../connection_consumer"
+import . "../connection"
 
 type TopicSession struct {
-  SubscribedList string[[]MessageListener]
+  //TODO check if MessageListener type is really OutputStream
+  SubscribedList map[string][]OutputStream
   MyConnectionSendMessage Connection
   MyMessageListener OutputStream
+}
+
+func (tsession *TopicSession) CreateSession() {
+  tsession.SubscribedList = make(map[string][]OutputStream)
 }
 
 func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
@@ -32,11 +37,19 @@ func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
   tsubscriber.CreateTopicSubscriber(tpc)
 
   tsession.MyConnectionSendMessage.Subscribe(tpc, tsession)
-  //TODO implement HashMap access
-  list_of_subscribers_of_this_topic := tsession.SubscibedList.get(tpc.GetName)
-  list_of_subscribers_of_this_topic.append(tpublisher)
-  tsession.SubscribedList.append(tpc.GetName(),list_of_subscribers_of_this_topic)
-  
+
+  subscribed_list := tsession.SubscribedList
+  list_of_subscribers_of_this_topic := subscribed_list[tpc.GetName()]
+
+  if list_of_subscribers_of_this_topic == nil {
+    var list []OutputStream
+    list = make([]OutputStream, tsubscriber)
+    list_of_subscribers_of_this_topic = list
+  }else{
+    list_of_subscribers_of_this_topic.append(tsubscriber)
+  }
+  tsession.SubscribedList[tpc.GetName()] = list_of_subscribers_of_this_topic
+
   return tsubscriber
 }
 
