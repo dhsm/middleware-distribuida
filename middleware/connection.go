@@ -5,39 +5,68 @@ import "math"
 import "time"
 import "log"
 import "errors"
+import "reflection"
 
 import "github.com/nu7hatch/gouuid"
 
 import . "../packet"
 import . "../message"
 import . "../client_request_handler"
-// import . "../server_request_handler"
-//import . "../topic"
+
+type OnMessageReceived func(msg Message)
 
 type SubscribedSafe struct{
 	sync.Mutex
-	Map map[string][]OnPacketReceived
+	Map map[string][]OnMessageReceived
 }
 
 func (sd *SubscribedSafe) Init() {
-	sd.Map = make(map[string][]OnPacketReceived)
+	sd.Map = make(map[string][]OnMessageReceived)
 }
 
-func (sd *SubscribedSafe) Get(key string) ([]OnPacketReceived, bool){
+func (sd *SubscribedSafe) Get(key string) ([]OnMessageReceived, bool){
 	defer sd.Unlock()
 	sd.Lock()
 	l, found := sd.Map[key]
 	return l, found
 }
 
-func (sd *SubscribedSafe) Add(key string, fu OnPacketReceived){
+func (sd *SubscribedSafe) Add(key string, fu OnMessageReceived){
 	defer sd.Unlock()
 	sd.Lock()
 	_, f := sd.Map[key]
 	if (!f) {
-		sd.Map[key] = make([]OnPacketReceived,0)
+		sd.Map[key] = make([]OnMessageReceived,0)
 	}
+
+	//Checking if this listener is not already in this list
+	for _, fun := range sd.Map[key] {
+		if(reflect.DeepEqual(fun, fu)){
+			return
+		}
+	}
+
 	sd.Map[key] = append(sd.Map[key], fu)
+}
+
+func (sd *SubscribedSafe) Remove(key string, fu OnMessageReceived){
+	f, e := sd.Map[key]
+
+	if(!e){
+		return false
+	}
+
+	//Removing the function from the list of listeners for the topic
+	for i, elem := range f {
+		if(reflect.DeepEqual(elem, fu)){
+			f[i] = f[len(f)-1]
+			f[len(f)-1] = nil
+			f = f[:len(f)-1]
+			return true
+		}
+	}
+
+	return false
 }
 
 type MessageWaitingAck struct{
@@ -72,6 +101,22 @@ func (was *WaitingACKSafe) Remove(key string){
 	defer was.Unlock()
 	was.Lock()
 	delete(was.Map,key)
+}
+
+func (was *WaitingACKSafe) Len(key string) int{
+	defer was.Unlock()
+	was.Lock()
+	return len(was.Map)
+}
+
+func (was *WaitingACKSafe) Peek(key string) (string, MessageWaitingAck, bool){
+	defer was.Unlock()
+	was.Lock()
+	for k, e := range was.Map {
+		return k, e, true
+	}
+
+	return nil, MessageWaitingAck{}, false
 }
 
 
@@ -173,19 +218,148 @@ func (cnn *Connection) SendMessage(msg Message) error{
 	cnn.SetModified()
 
 	pkt := Packet{}
-  	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
-  	cnn.PacketIDGenerator++
-  	cnn.SenderConnection.SendAsync(pkt)
+	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
+	cnn.PacketIDGenerator++
+	cnn.SenderConnection.SendAsync(pkt)
 	return nil
 }
 
-func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu OnPacketReceived){
+func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu OnMessageReceived){
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
 	cnn.Subscribed.Add(topic.GetTopicName(), fu)
 }
 
-func (cnn *Connection) OnMessageReceived(pkt Packet){
+func (cnn *Connection) UnsubscribeSessionToDestination(topic Topic, fu OnMessageReceived) bool{
+	defer cnn.Lock.Unlock()
+	cnn.Lock.Lock()
+	cnn.Subscribe.Remove(topic.GetTopicName(), fu)
+}
+
+func (cnn *Connection) Subscribe(topic Topic, fu OnMessageReceived) error{
+	err := cnn.IsOpen()
+	if(err != nil){
+		log.Print(err)
+		return err
+	}
+	cnn.SetModified()
+	cnn.SubscribeSessionToDestination(topic, fu)
+	pkt := Packet{}
+	params := []string{cnn.ClientID, topic.GetTopicName()}
+	pkt.CreatePacket(SUBSCRIBE, cnn.PacketIDGenerator, params, Message{})
+	cnn.PacketIDGenerator++
+	return cnn.SenderConnection.Send(pkt)
+}
+
+func (cnn *Connection) Unsubscribe(topic Topic, fu OnMessageReceived) error{
+	err := cnn.IsOpen()
+	if(err != nil){
+		log.Print(err)
+		return err
+	}
+	cnn.SetModified()
+	result := cnn.UnsubscribeSessionToDestination(topic, fu)
+	if (result){
+		pkt := Packet{}
+		params := []string{cnn.ClientID, topic.GetTopicName()}
+		pkt.CreatePacket(UNSUBSCRIBE, cnn.PacketIDGenerator, params, Message{})
+		cnn.PacketIDGenerator++
+		return cnn.SenderConnection.Send(pkt)
+	}
+
+	return nil
+}
+
+func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
+	err := cnn.IsOpen()
+	if(err != nil){
+		log.Print(err)
+		return err
+	}
+	cnn.SetModified()
+	pkt := Packet{}
+	params := []string{cnn.ClientID, msg.MessageID}
+	pkt.CreatePacket(ACK, cnn.PacketIDGenerator, params, Message{})
+	cnn.PacketIDGenerator++
+	return cnn.SenderConnection.SendAsync(pkt)
+}
+
+func (cnn *Connection) CloseSession(ts TopicSession){
+	// err := cnn.IsOpen()
+	// if(err != nil){
+	// 	log.Print(err)
+	// 	return err
+	// }
+	// cnn.SetModified()
+	// pkt := Packet{}
+	// params := []string{cnn.ClientID, msg.MessageID}
+	// pkt.CreatePacket(ACK, cnn.PacketIDGenerator, params, Message{})
+	// cnn.PacketIDGenerator++
+	// return cnn.SenderConnection.SendAsync(pkt)
+}
+
+func (cnn *Connection) CreateTopic(tp Topic) error{
+	err := cnn.IsOpen()
+	if(err != nil){
+		log.Print(err)
+		return err
+	}
+	pkt := Packet{}
+	params := []string{cnn.ClientID, tp.GetTopicName()}
+	pkt.CreatePacket(CREATE_TOPIC, cnn.PacketIDGenerator, params, Message{})
+	cnn.PacketIDGenerator++
+	return cnn.SenderConnection.SendAsync(pkt)
+}
+
+func (cnn *Connection) ProcessACKS(){
+	go func () {
+		for{
+			err := cnn.IsOpen()
+			if(err != nil){
+				log.Print(err)
+				break
+			}
+
+			if (cnn.WaitingACK.Len() == 0){
+				cnn.Lock.Lock()
+
+				err := cnn.IsOpen()
+				if(err != nil){
+					log.Print(err)
+					break
+				}
+
+				cnn.MessageSent.Wait() //Waiting for messages to be sent before stat to process ACKS again
+				cnn.Lock.Unlock()
+			}
+
+			err := cnn.IsOpen()
+			if(err != nil){
+				log.Print(err)
+				break
+			}
+
+			key, maa, f := cnn.WaitingACK.Peek()
+			if(f){
+				curr := int32(time.Now().Unix())
+				if(maa.TimeStamp <= curr){
+					cnn.WaitingACK.Remove(key)
+					cnn.SendMessage(maa.Message)
+				}else{
+					time.Sleep(time.Microsecond * Time.Duration(curr))
+				}
+			}
+
+			err := cnn.IsOpen()
+			if(err != nil){
+				log.Print(err)
+				break
+			}
+		}
+	}()
+}
+
+func (cnn *Connection) OnPacketReceived(pkt Packet){
 
 }
 
@@ -211,7 +385,7 @@ func (cnn *Connection) Start(){
 			cnn.ReceiverConnection.SetOnMessage(cnn.OnMessageReceived)
 			cnn.SenderConnection.SetOnMessage(cnn.OnMessageReceived)
 			cnn.ReceiverConnection.ListenIncomingPackets()
-			//Implement process ACKS
+			go cnn.ProcessACKS()
 			break
 		}
 	}

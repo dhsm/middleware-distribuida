@@ -21,7 +21,7 @@ func main(){
 
   println("Creating message...")
   msg := Message{}
-  msg.CreateMessage("Hi Server!", 99)
+  msg.CreateMessage("Hi Server!", "notopic", 99, "semid")
   
   println("Creating packet...")
   pkt := Packet{}
@@ -42,7 +42,9 @@ func main(){
   crh.SendAsync(pkt)
   crh.SendAsync(pkt)
   crh.SendAsync(pkt)
-  crh.ListenIncomingPackets(printReceivedPackets)
+  crh.SetOnMessage(printReceivedPackets)
+  crh
+  crh.ListenIncomingPackets()
   println("Waiting 20 before end execution...")
   time.Sleep(time.Second * 20)
 }

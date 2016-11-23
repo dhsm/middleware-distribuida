@@ -30,7 +30,7 @@ func main(){
 
   pktReceived = srh.Receive()
   println("Creating response message...")
-  msg.CreateMessage("Hi Client", 99)
+  msg.CreateMessage("Hi Client", "notopic", 99, "semid")
   pkt.CreatePacket(MESSAGE, 0, params, msg)
   srh.Send(pkt)
 
