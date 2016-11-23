@@ -28,12 +28,12 @@ func main(){
   params := []string{"arg0", "arg1", "arg2"}
   pkt.CreatePacket(MESSAGE, 0, params, msg)
 
-  // crh.SendAsync(pkt)
+  crh.SendAsync(pkt)
   // time.Sleep(time.Second)
   // crh.SendAsync(pkt)
 
   var pktReceived Packet
-  pktReceived, err = crh.SendAndReceive(pkt)
+  pktReceived, err = crh.Receive()
   if(err != nil){
     fmt.Println(err)
   }

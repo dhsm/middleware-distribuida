@@ -1,34 +1,54 @@
 package connection
 
-import "../packet"
-import "../message"
-import "../client_request_handler"
-import "../server_request_handler"
-import "net"
+import "sync"
+
+import . "../packet"
+// import . "../message"
+import . "../client_request_handler"
+// import . "../server_request_handler"
+import . "../topic_session"
+
+type onPacketReceived func(pkt Packet)
+
+type SubscribedSafe struct{
+	sync.Mutex
+	Map map[string][]onPacketReceived
+}
+
+func (sd *SubscribedSafe) Init() {
+	sd.Map = make(map[string][]onPacketReceived)
+}
+
+type WaitingACKSafe struct{
+	sync.Mutex
+	Map map[int]Packet
+}
+
+func (was *WaitingACKSafe) Init() {
+	was.Map = make(map[int]Packet)
+}
 
 type Connection struct{
-	CHR ClientRequestHandler
-	WaitingACK map[int]Packet
-	BrokerAddress string
-	BrokerPort string
-	BrokerProtocol string
-	InputStream <-chan Message
-	OutputStream chan<- Message
+	sync.Mutex
+	ClientId string
+	HostIp string
+	HostPort string
+	HostProtocol string
+
+	ReceiverConnection ClientRequestHandler
+	SenderConnection ClientRequestHandler
+
+	Subscribed SubscribedSafe
+	WaitingACK WaitingACKSafe
+
+	Sessions []TopicSession
 }
 
-func (cnn *Connection) CreateConnection(br_addr string, br_port string, br_protocol string){
-	cnn.BrokerAddress = br_addr
-	cnn.BrokerPort = br_port
-	cnn.BrokerProtocol = br_protocol
-	cnn.InputStream = make(chan Packet, 250)
-	cnn.OutputStream = make(chan Packet, 250)
-	cnn.WaitingACK = make(map[int]Packet)
-}
-
-func (cnn *Connection) GetInputStream() <-chan Message{
-	return cnn.InputStream
-}
-
-func (cnn *Connection) GetOutputStream() chan<- Message{
-	return cnn.OutputStream
+func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_protocol string){
+	cnn.HostIp = host_ip
+	cnn.HostPort = host_port
+	cnn.HostProtocol = host_protocol
+	cnn.WaitingACK.Init()
+	cnn.Subscribed.Init()
+	cnn.Sessions = make([]TopicSession, 50)
 }

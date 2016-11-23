@@ -13,6 +13,7 @@ import . "../message"
 type ClientRequestHandler struct {
 	sync.Mutex
 	Connection net.Conn
+	Closed bool
 }
 
 type onPacketReceived func(pkt Packet)
@@ -21,6 +22,7 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port strin
 	gob.Register(Packet{})
 	conn, err := net.Dial(protocol, net.JoinHostPort(host, port))
 	crh.Connection = conn
+	crh.Closed = false
 
 	if (err != nil){
 		log.Print("Error stablishing connection to: ", host, " at port ", port, " using ", protocol, " protocol.")
@@ -119,36 +121,37 @@ func (crh ClientRequestHandler) Close() error{
 		log.Print("Erro closing connection. ", err)
 	}
 
+
 	return err
 }
 
 func (crh ClientRequestHandler) SendAsync(pkt Packet){
 	go func (){
 		crh.Lock()
-		enc := gob.NewEncoder(crh.Connection)
-		err := enc.Encode(pkt)
+		encoded, err := json.Marshal(pkt)
+		encoded_size, err := json.Marshal(len(encoded))
+		crh.Connection.Write(encoded_size)
+		crh.Connection.Write(encoded)
 		crh.Unlock()
 
 		if (err != nil){
-			log.Print("Encoding error sending packet: ", err)
+			log.Print("Encoding error sending packet", err)
 		}
 	}()
 }
 
 func (crh ClientRequestHandler) ListenIncomingPackets(listener onPacketReceived){
 	go func () {
-		var run = true
-		for run{
+		for !crh.Closed{
 			pkt, err := crh.Receive()
 			
 			if (err!=nil){
-				run = false
-				continue
+				crh.Closed = true
+			}else{
+				crh.Lock()
+				listener(pkt)
+				crh.Unlock()
 			}
-
-			crh.Lock()
-			listener(pkt)
-			crh.Unlock()
 		}
 	}()
 }
