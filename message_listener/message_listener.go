@@ -1,7 +1,9 @@
 package MessageListener
 
-type MessageListener
+import . "../message"
 
-func (msgListener *MessageLister) onMessage(msg Message) {
+type MessageListener struct {}
+
+func (msgListener *MessageListener) onMessage(msg Message) {
 
 }

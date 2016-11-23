@@ -4,13 +4,6 @@ import "testing"
 import . "../topic"
 import . "../topic_session"
 
-func TestCreateConnection(t *testing.T) {
-  //TODO
-  // if topicname != "meu_topico_massa" {
-  //   t.Error("Expected meu_topico_massa, got ", topicname)
-  // }
-}
-
 func TestCreateTopic(t *testing.T) {
   var topic Topic
   tsession := TopicSession{}

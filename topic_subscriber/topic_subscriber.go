@@ -1,8 +1,8 @@
 package topic_subscriber
 
 import . "../topic"
-import . "../message"
-import . "../session"
+// import . "../message"
+import . "../topic_session"
 
 type TopicSubscriber struct{
   MyTopic Topic

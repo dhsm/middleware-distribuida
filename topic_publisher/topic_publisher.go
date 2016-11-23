@@ -2,7 +2,7 @@ package topic_publisher
 
 import . "../topic"
 import . "../message"
-import . "../session"
+// import . "../topic_session"
 
 type TopicPublisher struct {
   MyTopic Topic
