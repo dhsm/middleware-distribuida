@@ -19,5 +19,5 @@ func (msg *Message) CreateMessage(msgtext string, destination string, priority i
 }
 
 func (msg *Message) GetText() string{
-  return msg.Msgtext
+  return msg.MsgText
 }

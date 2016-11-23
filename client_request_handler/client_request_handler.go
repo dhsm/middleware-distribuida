@@ -16,7 +16,6 @@ type ClientRequestHandler struct {
 	sync.Mutex
 	Connection net.Conn
 	Closed bool
-	OnMessage OnPacketReceived
 }
 
 func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
@@ -141,7 +140,7 @@ func (crh ClientRequestHandler) SendAsync(pkt Packet){
 	}()
 }
 
-func (crh ClientRequestHandler) ListenIncomingPackets(){
+func (crh ClientRequestHandler) ListenIncomingPackets(listener OnPacketReceived){
 	go func () {
 		for !crh.Closed{
 			pkt, err := crh.Receive()
@@ -150,7 +149,7 @@ func (crh ClientRequestHandler) ListenIncomingPackets(){
 				crh.Closed = true
 			}else{
 				crh.Lock()
-				crh.OnMessage(pkt)
+				crh.Connection.OnPacketReceived(pkt)
 				crh.Unlock()
 			}
 		}
@@ -162,12 +161,5 @@ func (crh ClientRequestHandler) SetConnection(connection net.Conn){
 	crh.Connection = connection
 	crh.Unlock()
 }
-
-func (crh ClientRequestHandler) SetOnMessage(listener OnPacketReceived){
-	crh.Lock()
-	crh.OnMessage = listener
-	crh.Unlock()
-}
-
 
 
