@@ -101,3 +101,31 @@ func (pkt *Packet) GetParams() []string{
 func (pkt *Packet) SetParams(params []string){
 	pkt.Params = params
 }
+
+func (pkt *Packet) IsRegisterSender() bool{
+	return pkt.Operation == REGISTER_SENDER
+}
+func (pkt *Packet) IsRegisterReceiver() bool{
+	return pkt.Operation == REGISTER_RECEIVER
+}
+func (pkt *Packet) IsRegisterSenderAck() bool{
+	return pkt.Operation == REGISTER_SENDER_ACK
+}
+func (pkt *Packet) IsRegisterReceiverAck() bool{
+	return pkt.Operation == REGISTER_RECEIVER_ACK
+}
+func (pkt *Packet) IsSubscribe() bool{
+	return pkt.Operation == SUBSCRIBE
+}
+func (pkt *Packet) IsUnsubscribe() bool{
+	return pkt.Operation == UNSUBSCRIBE
+}
+func (pkt *Packet) IsCreateTopic() bool{
+	return pkt.Operation == CREATE_TOPIC
+}
+func (pkt *Packet) IsMessage() bool{
+	return pkt.Operation == MESSAGE
+}
+func (pkt *Packet) IsACK() bool{
+	return pkt.Operation == ACK
+}

@@ -119,12 +119,10 @@ func (crh *ClientRequestHandler) Close() error{
 	if (err != nil){
 		log.Print("Erro closing connection. ", err)
 	}
-
-
 	return err
 }
 
-func (crh *ClientRequestHandler) SendAsync(pkt Packet){
+func (crh ClientRequestHandler) SendAsync(pkt Packet){
 	go func (){
 		crh.Lock()
 		encoded, err := json.Marshal(pkt)
@@ -139,7 +137,7 @@ func (crh *ClientRequestHandler) SendAsync(pkt Packet){
 	}()
 }
 
-func (crh *ClientRequestHandler) ListenIncomingPackets(){
+func (crh ClientRequestHandler) ListenIncomingPackets(){
 	go func () {
 		for !crh.Closed{
 			pkt, err := crh.Receive()

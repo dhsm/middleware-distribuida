@@ -6,15 +6,13 @@ import "time"
 import "log"
 import "errors"
 import "reflect"
-import "fmt"
+// import "fmt"
 
 import "github.com/nu7hatch/gouuid"
 
 import . "../packet"
 import . "../message"
 import . "../client_request_handler"
-
-
 
 type Subscribed struct{
 	Map map[string][]MessageListener
@@ -27,6 +25,10 @@ func (sd *Subscribed) Init() {
 func (sd *Subscribed) Get(key string) ([]MessageListener, bool){
 	l, found := sd.Map[key]
 	return l, found
+}
+
+func (sd *Subscribed) Set(key string, listeners []MessageListener){
+	sd.Map[key] = listeners
 }
 
 func (sd *Subscribed) Add(key string, fu MessageListener){
@@ -115,7 +117,6 @@ func (was *WaitingACKSafe) Peek() (string, MessageWaitingAck, bool){
 	return "", MessageWaitingAck{}, false
 }
 
-
 type Connection struct{
 	Lock sync.Mutex
 	MessageSent sync.Cond
@@ -184,15 +185,25 @@ func (cnn *Connection) SetClientID(clientid string) error{
 	return nil
 }
 
-func (cnn *Connection) Close() error{
+func (cnn *Connection) Close(){
+	cnn.SetModified()
+	cnn.Lock.Lock()
+	cnn.Open = false
 
-	return nil
+	for cnn.WaitingACK.Len() > 0{
+		cnn.AckReceived.Wait()
+	}
+
+	cnn.ReceiverConnection.Close()
+	cnn.SenderConnection.Close()
+
+	cnn.Lock.Unlock()
 }
 
-func (cnn *Connection) CreateSession() TopicSession{
+func (cnn Connection) CreateSession() TopicSession{
 	cnn.SetModified()
 	tp := TopicSession{}
-	//TODO: Add create session call when ready
+	tp.CreateSession(cnn)
 	cnn.Sessions = append(cnn.Sessions, tp)
 	return tp
 }
@@ -282,17 +293,16 @@ func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
 }
 
 func (cnn *Connection) CloseSession(ts TopicSession){
-	// err := cnn.IsOpen()
-	// if(err != nil){
-	// 	log.Print(err)
-	// 	return err
-	// }
-	// cnn.SetModified()
-	// pkt := Packet{}
-	// params := []string{cnn.ClientID, msg.MessageID}
-	// pkt.CreatePacket(ACK, cnn.PacketIDGenerator, params, Message{})
-	// cnn.PacketIDGenerator++
-	// return cnn.SenderConnection.SendAsync(pkt)
+	for k, v := range cnn.Subscribed.Map{
+		for i, e := range v{
+			if(reflect.DeepEqual(e,ts)){
+				v[i] = v[len(v)-1]
+				v[len(v)-1] = nil
+				v = v[:len(v)-1]
+				cnn.Subscribed.Set(k, v )
+			}
+		}
+	}
 }
 
 func (cnn *Connection) CreateTopic(tp Topic) error{
@@ -358,8 +368,28 @@ func (cnn *Connection) ProcessACKS(){
 }
 
 func (cnn Connection) OnPacket(pkt Packet){
-	fmt.Println(pkt)
-	fmt.Println(cnn.ClientID)
+	if(!cnn.Stopped){
+		if(pkt.IsMessage()){
+			msg := pkt.Msg
+			destination := msg.Destination
+			cnn.Lock.Lock()
+			sessions, found := cnn.Subscribed.Get(destination)
+			if(found){
+				for _, session := range sessions{
+					session.OnMessage(msg)
+				}
+			}else{
+				println("No sessions")
+			}
+			cnn.Lock.Unlock()
+		}else if(pkt.IsACK()){
+			key := pkt.Params[1]
+			cnn.Lock.Lock()
+			cnn.WaitingACK.Remove(key)
+			cnn.AckReceived.Broadcast()
+			cnn.Lock.Unlock()
+		}
+	}
 }
 
 func (cnn Connection) Start(){
