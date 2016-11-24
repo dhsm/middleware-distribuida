@@ -2,7 +2,6 @@ package middleware
 
 import . "../message"
 import . "../message_listener"
-// import . "../topic_session"
 
 type TopicPublisher struct {
   MyTopic Topic
