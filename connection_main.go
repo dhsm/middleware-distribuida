@@ -1,9 +1,9 @@
 package main
 
 import "fmt"
-import "reflect"
+// import "reflect"
 
-// import . "./connection"
+import . "./middleware"
 import . "./packet"
 
 type onPacketReceived func(pkt Packet)

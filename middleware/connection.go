@@ -5,7 +5,8 @@ import "math"
 import "time"
 import "log"
 import "errors"
-import "reflection"
+import "reflect"
+import "fmt"
 
 import "github.com/nu7hatch/gouuid"
 
@@ -49,11 +50,11 @@ func (sd *SubscribedSafe) Add(key string, fu OnMessageReceived){
 	sd.Map[key] = append(sd.Map[key], fu)
 }
 
-func (sd *SubscribedSafe) Remove(key string, fu OnMessageReceived){
+func (sd *SubscribedSafe) Remove(key string, fu OnMessageReceived) bool{
 	f, e := sd.Map[key]
 
 	if(!e){
-		return false
+		return e
 	}
 
 	//Removing the function from the list of listeners for the topic
@@ -103,20 +104,20 @@ func (was *WaitingACKSafe) Remove(key string){
 	delete(was.Map,key)
 }
 
-func (was *WaitingACKSafe) Len(key string) int{
+func (was *WaitingACKSafe) Len() int{
 	defer was.Unlock()
 	was.Lock()
 	return len(was.Map)
 }
 
-func (was *WaitingACKSafe) Peek(key string) (string, MessageWaitingAck, bool){
+func (was *WaitingACKSafe) Peek() (string, MessageWaitingAck, bool){
 	defer was.Unlock()
 	was.Lock()
 	for k, e := range was.Map {
 		return k, e, true
 	}
 
-	return nil, MessageWaitingAck{}, false
+	return "", MessageWaitingAck{}, false
 }
 
 
@@ -233,7 +234,7 @@ func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu OnMessageRe
 func (cnn *Connection) UnsubscribeSessionToDestination(topic Topic, fu OnMessageReceived) bool{
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
-	cnn.Subscribe.Remove(topic.GetTopicName(), fu)
+	return cnn.Subscribed.Remove(topic.GetTopicName(), fu)
 }
 
 func (cnn *Connection) Subscribe(topic Topic, fu OnMessageReceived) error{
@@ -281,7 +282,8 @@ func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
 	params := []string{cnn.ClientID, msg.MessageID}
 	pkt.CreatePacket(ACK, cnn.PacketIDGenerator, params, Message{})
 	cnn.PacketIDGenerator++
-	return cnn.SenderConnection.SendAsync(pkt)
+	cnn.SenderConnection.SendAsync(pkt)
+	return nil
 }
 
 func (cnn *Connection) CloseSession(ts TopicSession){
@@ -308,7 +310,8 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 	params := []string{cnn.ClientID, tp.GetTopicName()}
 	pkt.CreatePacket(CREATE_TOPIC, cnn.PacketIDGenerator, params, Message{})
 	cnn.PacketIDGenerator++
-	return cnn.SenderConnection.SendAsync(pkt)
+	cnn.SenderConnection.SendAsync(pkt)
+	return nil
 }
 
 func (cnn *Connection) ProcessACKS(){
@@ -333,7 +336,7 @@ func (cnn *Connection) ProcessACKS(){
 				cnn.Lock.Unlock()
 			}
 
-			err := cnn.IsOpen()
+			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
 				break
@@ -346,11 +349,11 @@ func (cnn *Connection) ProcessACKS(){
 					cnn.WaitingACK.Remove(key)
 					cnn.SendMessage(maa.Message)
 				}else{
-					time.Sleep(time.Microsecond * Time.Duration(curr))
+					time.Sleep(time.Microsecond * time.Duration(curr))
 				}
 			}
 
-			err := cnn.IsOpen()
+			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
 				break
@@ -359,8 +362,8 @@ func (cnn *Connection) ProcessACKS(){
 	}()
 }
 
-func (cnn *Connection) OnPacketReceived(pkt Packet){
-
+func (cnn Connection) OnPacketReceived(pkt Packet){
+	fmt.Println(pkt)
 }
 
 func (cnn *Connection) Start(){
@@ -382,8 +385,8 @@ func (cnn *Connection) Start(){
 
 			cnn.Open = true
 			cnn.Stopped = false
-			cnn.ReceiverConnection.SetOnMessage(cnn.OnMessageReceived)
-			cnn.SenderConnection.SetOnMessage(cnn.OnMessageReceived)
+			cnn.ReceiverConnection.SetConnection(cnn)
+			cnn.SenderConnection.SetConnection(cnn)
 			cnn.ReceiverConnection.ListenIncomingPackets()
 			go cnn.ProcessACKS()
 			break
