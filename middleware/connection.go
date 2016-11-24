@@ -12,7 +12,6 @@ import "github.com/nu7hatch/gouuid"
 
 import . "../packet"
 import . "../message"
-import . "../message_listener"
 import . "../client_request_handler"
 
 

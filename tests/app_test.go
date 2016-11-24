@@ -1,7 +1,7 @@
 package main
 
 import "testing"
-import . "../topic"
+import . "../middleware"
 
 func TestCreateTopic(t *testing.T) {
   var topic Topic
@@ -17,9 +17,9 @@ func TestPublishMessage(t *testing.T) {
   tsession := TopicSession{}
   topic = tsession.CreateTopic("arvores_topic")
 
-  tpublisher := tsession.CreatePublisher(topic)
+  tpublisher := tsession.CreateTopicPublisher(topic)
 
-  msg := tsession.CreateMessage("oi_brasil",99)
+  msg := tsession.CreateMessage("Pau que nasce torto", "arborismo",1,"m1")
 
   tpublisher.Publish(msg)
 

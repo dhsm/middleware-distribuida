@@ -10,10 +10,6 @@ import "encoding/gob"
 import . "../packet"
 import . "../message"
 
-type PacketListener interface {
-    OnPacket (pkt Packet)
-}
-
 type ClientRequestHandler struct {
 	sync.Mutex
 	Connection net.Conn
@@ -34,7 +30,7 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port strin
 
 
 	err = crh.SendType(isSubscriber, clientID)
-	
+
 	if (err != nil){
 		log.Print("Error when registering a Client Request Handler for client: ", clientID)
 		return err
@@ -67,13 +63,13 @@ func (crh *ClientRequestHandler) Send(pkt Packet) error{
 func (crh *ClientRequestHandler) Receive () (Packet, error){
 	var pkt Packet
 	var masPktSize int64
-	
+
 	crh.Lock()
 	size := make([]byte, 3)
 	io.ReadFull(crh.Connection,size)
 	_ = json.Unmarshal(size, &masPktSize)
 	packetMsh := make([]byte, masPktSize)
-	io.ReadFull(crh.Connection,packetMsh)	
+	io.ReadFull(crh.Connection,packetMsh)
 	_ = json.Unmarshal(packetMsh, &pkt)
 	crh.Unlock()
 
@@ -93,9 +89,9 @@ func (crh *ClientRequestHandler) SendType(isSubscriber bool, clientID string) er
 	msg := Message{}
 	params := []string{clientID}
 	if (isSubscriber){
-		pkt.CreatePacket(REGISTER_RECEIVER, 0, params, msg)	
+		pkt.CreatePacket(REGISTER_RECEIVER, 0, params, msg)
 	}else{
-		pkt.CreatePacket(REGISTER_SENDER, 0, params, msg)	
+		pkt.CreatePacket(REGISTER_SENDER, 0, params, msg)
 	}
 	return crh.Send(pkt)
 }
@@ -147,7 +143,7 @@ func (crh ClientRequestHandler) ListenIncomingPackets(){
 	go func () {
 		for !crh.Closed{
 			pkt, err := crh.Receive()
-			
+
 			if (err!=nil){
 				crh.Closed = true
 			}else{
@@ -164,5 +160,3 @@ func (crh *ClientRequestHandler) SetConnection(connection PacketListener){
 	crh.CNN = connection
 	crh.Unlock()
 }
-
-

@@ -1,6 +1,4 @@
-package MessageListener
-
-import . "../message"
+package message
 
 type MessageListener interface {
 	OnMessage(msg *Message)
