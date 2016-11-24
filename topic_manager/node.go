@@ -24,11 +24,11 @@ func (node *Node) SetSubscribed(list map[string]int) {
   node.Subscribed = list
 }
 
-func (node *Node) GetMessages() interface{} {
+func (node *Node) GetMessages() PriorityQueue {
   return node.getMessages().(PriorityQueue)
 }
 
-func (node *Node) getMessages() PriorityQueue {
+func (node *Node) getMessages() interface{} {
   return node.Messages
 }
 

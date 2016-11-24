@@ -3,6 +3,7 @@ package main
 import "testing"
 import . "../middleware"
 import . "../message"
+import . "../topic_manager"
 
 func TestCreateTopicOld(t *testing.T) {
   var topic Topic
@@ -20,6 +21,14 @@ func TestCreateMessage(t *testing.T) {
   msgtext := msg.GetText()
   if msgtext != "Pau que nasce torto" {
     t.Error("Excpected oi testes, got ",msgtext)
+  }
+}
+
+func TestCreateNode(t *testing.T){
+  node := Node{}
+  node.CreateNode("meu no")
+  if node.GetTotalMessages() != 0 {
+    t.Error("Expected 0, got ",node.GetTotalMessages())
   }
 }
 //
