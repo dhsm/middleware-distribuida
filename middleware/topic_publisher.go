@@ -22,3 +22,7 @@ func (tpublisher *TopicPublisher) Publish(msg Message){
 func (tpublisher *TopicPublisher) GetTopic() Topic{
   return tpublisher.MyTopic
 }
+
+func (tpublisher *TopicPublisher) Send(msg Message) {
+  tpublisher.SessionSend.Send(msg)
+}

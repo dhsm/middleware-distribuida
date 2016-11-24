@@ -14,7 +14,7 @@ func main() {
   publisher := session.CreateTopicPublisher(topic)
 
   conn.Start()
-
-  publisher.Send(session.CreateMessage("Pau que nasce torto", 1))
-  publisher.Send(session.CreateMessage("Nunca de endireita", 5))
+  
+  publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
+  publisher.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
 }

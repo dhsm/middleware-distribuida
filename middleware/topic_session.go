@@ -19,7 +19,7 @@ func (tsession *TopicSession) CreateSession(conn Connection) {
   tsession.MyConnectionSendMessage = conn
 }
 
-func (tsession *TopicSession) CreatePublisher(tpc Topic) TopicPublisher {
+func (tsession *TopicSession) CreateTopicPublisher(tpc Topic) TopicPublisher {
   return tsession.createPublisherInternal(tpc).(TopicPublisher)
 }
 
@@ -68,8 +68,9 @@ func (tsession *TopicSession) CreateTopic(topicname string) Topic{
 }
 
 //TODO check if here we really need to create an empty message
-func (tsession *TopicSession) CreateMessage() Message{
+func (tsession *TopicSession) CreateMessage(msgtext string, destination string, priority int, messageid string) Message{
   msg := Message{}
+  msg.CreateMessage(msgtext, destination, priority, messageid)
   return msg
 }
 
