@@ -113,8 +113,7 @@ func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_p
 
 func (cnn *Connection) IsOpen() error{
 	if (!cnn.Open){
-		return errors.Errorf("Operation not allowed in closed connection.")
-		// return errors.New("Operation not allowed in closed connection.")
+		return errors.New("Operation not allowed in closed connection.")
 	}
 	return nil
 }
@@ -162,7 +161,6 @@ func (cnn Connection) CreateSession() TopicSession{
 func (cnn *Connection) SendMessage(msg Message) error{
 	err := cnn.IsOpen()
 	if(err != nil){
-		log.Print(err.(*errors.Error).ErrorStack())
 		return err
 	}
 
