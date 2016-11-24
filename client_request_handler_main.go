@@ -2,6 +2,7 @@ package main
 
 import . "./message"
 import . "./packet"
+import . "./middleware"
 import . "./client_request_handler"
 import "fmt"
 import "time"
@@ -42,8 +43,9 @@ func main(){
   crh.SendAsync(pkt)
   crh.SendAsync(pkt)
   crh.SendAsync(pkt)
-  crh.SetOnMessage(printReceivedPackets)
-  crh
+  cnn := Connection{}
+  cnn.CreateConnection("127.0.0.1", "8081", "tcp")
+  crh.SetConnection(cnn)
   crh.ListenIncomingPackets()
   println("Waiting 20 before end execution...")
   time.Sleep(time.Second * 20)
