@@ -116,13 +116,16 @@ func (crh *ClientRequestHandler) WaitAck(isSubscriber bool) error{
 }
 
 func (crh *ClientRequestHandler) Close() error{
+	defer crh.Unlock()
 	crh.Lock()
-	err := crh.Connection.Close()
-	crh.Unlock()
-	if (err != nil){
-		log.Print("Erro closing connection. ", err)
+	if(crh.Connection != nil){
+		err := crh.Connection.Close()
+		if (err != nil){
+			log.Print("Erro closing connection. ", err)
+		}
+		return err
 	}
-	return err
+	return nil
 }
 
 func (crh ClientRequestHandler) SendAsync(pkt Packet){
