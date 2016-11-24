@@ -4,12 +4,6 @@ import "time"
 
 import . "../message"
 
-type Enum interface {
-	Name() string
-	Ordinal() int
-	ValueOf() *[]string
-}
-
 type Operation uint
 
 const (
@@ -76,6 +70,10 @@ func (pkt *Packet) SetOperation(operation Operation){
 
 func (pkt *Packet) GetID() uint{
 	return pkt.ID
+}
+
+func (pkt *Packet) GetClientID() string{
+	return pkt.Params[0]
 }
 
 func (pkt *Packet) SetID(id uint){

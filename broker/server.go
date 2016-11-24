@@ -1,5 +1,6 @@
 package broker
 
+import . "../packet"
 import . "../topic_manager"
 
 type Server struct {
@@ -32,4 +33,28 @@ func (server *Server) Init(port string) {
     server.Handlers[server.NextHandlerId] = connHandler
 
   }
+}
+
+type (server *Server) HandleRegisterSender(pkt Packet, id int){
+
+}
+
+type (server *Server) HandleRegisterReceiver(pkt Packet, id int){
+  
+}
+
+type (server *Server) HandleSubscribe(pkt Packet){
+  
+}
+
+type (server *Server) HandleUnsubscribe(pkt Packet){
+  
+}
+
+type (server *Server) HandleCreateTopic(pkt Packet){
+  
+}
+
+type (server *Server) HandleMessage(pkt Packet){
+  
 }

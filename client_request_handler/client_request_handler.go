@@ -5,7 +5,6 @@ import "log"
 import "sync"
 import "io"
 import "encoding/json"
-import "encoding/gob"
 
 import . "../packet"
 import . "../message"
@@ -18,7 +17,6 @@ type ClientRequestHandler struct {
 }
 
 func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
-	gob.Register(Packet{})
 	conn, err := net.Dial(protocol, net.JoinHostPort(host, port))
 	crh.Connection = conn
 	crh.Closed = false
@@ -44,6 +42,11 @@ func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port strin
 	}
 
 	return nil
+}
+
+func (crh *ClientRequestHandler) NewCRHWithConn(conn net.Conn){
+	crh.Connection = conn
+	crh.Closed = false
 }
 
 func (crh *ClientRequestHandler) Send(pkt Packet) error{
