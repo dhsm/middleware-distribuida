@@ -3,7 +3,6 @@ package middleware
 import "sync"
 //import . "../topic"
 import . "../message"
-import . "../message_listener"
 //import . "../topic_publisher"
 //import . "../topic_subscriber"
 //import . "../connection"
@@ -89,7 +88,7 @@ func (tsession *TopicSession) OnMessageReceived(msg Message) {
 
 func (tsession *TopicSession) Send(msg Message) {
   //TODO call send
-  //tsession.MyConnectionSendMessage.Send(msg)
+  tsession.MyConnectionSendMessage.SendMessage(msg)
 }
 
 func (tsession *TopicSession) CloseSubscriber(publisher TopicSubscriber){

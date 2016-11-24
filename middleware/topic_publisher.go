@@ -1,7 +1,6 @@
 package middleware
 
 import . "../message"
-import . "../message_listener"
 
 type TopicPublisher struct {
   MyTopic Topic

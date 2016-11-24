@@ -2,6 +2,7 @@ package main
 
 import "testing"
 import . "../middleware"
+import . "../message"
 
 func TestCreateTopicOld(t *testing.T) {
   var topic Topic
@@ -12,15 +13,15 @@ func TestCreateTopicOld(t *testing.T) {
     t.Error("Expected meu_topico_massa, got ", topicname)
   }
 }
-//
-// func TestCreateMessage(t *testing.T) {
-//   msg := Message{}
-//   msg.CreateMessage("oi testes", 99)
-//   msgtext := msg.GetText()
-//   if msgtext != "oi testes" {
-//     t.Error("Excpected oi testes, got ",msgtext)
-//   }
-// }
+
+func TestCreateMessage(t *testing.T) {
+  msg := Message{}
+  msg.CreateMessage("Pau que nasce torto", "arborismo",1,"m1")
+  msgtext := msg.GetText()
+  if msgtext != "Pau que nasce torto" {
+    t.Error("Excpected oi testes, got ",msgtext)
+  }
+}
 //
 // func TestAddMessageToTopic(t *testing.T) {
 //   msg := Message{}

@@ -10,10 +10,6 @@ import "encoding/gob"
 import . "../packet"
 import . "../message"
 
-type PacketListener interface {
-    OnPacket (pkt Packet)
-}
-
 type ClientRequestHandler struct {
 	sync.Mutex
 	Connection net.Conn
