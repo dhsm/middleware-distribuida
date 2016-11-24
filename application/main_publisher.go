@@ -1,5 +1,7 @@
 package main
 
+import . "../middleware"
+
 func main() {
   conn := Connection{}
   conn.CreateConnection("127.0.0.1", ":8081", "tcp")

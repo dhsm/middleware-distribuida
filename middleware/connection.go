@@ -5,7 +5,7 @@ import "math"
 import "time"
 import "log"
 import "errors"
-import "reflection"
+import "reflect"
 
 import "github.com/nu7hatch/gouuid"
 
