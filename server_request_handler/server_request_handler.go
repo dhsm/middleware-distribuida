@@ -28,6 +28,7 @@ func (srh ServerRequestHandler) Send(pkt Packet) {
 	if (err != nil){
 		log.Fatal("Encoding error", err)
 	}
+  return
 }
 
 func (srh *ServerRequestHandler) Receive() Packet {

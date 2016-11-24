@@ -6,27 +6,6 @@ import "fmt"
 import . "./middleware"
 import . "./packet"
 
-type onPacketReceived func(pkt Packet)
-
-type Tst struct{
-	k int
-}
-
-func (t *Tst) printReceivedPackets(pkt Packet){
-  fmt.Println(pkt)
-}
-
-func printReceivedPackets1(pkt Packet){
-  fmt.Println(pkt)
-}
-
-func printReceivedPackets2(pkt Packet){
-  fmt.Println(pkt)
-}
-
-func printReceivedPackets3(pkt Packet){
-  fmt.Println(pkt)
-}
 
 func main() {
 	cnn := Connection{}

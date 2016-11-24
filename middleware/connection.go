@@ -12,32 +12,28 @@ import "github.com/nu7hatch/gouuid"
 
 import . "../packet"
 import . "../message"
+import . "../message_listener"
 import . "../client_request_handler"
 
-type OnMessageReceived func(msg Message)
 
-type SubscribedSafe struct{
-	sync.Mutex
-	Map map[string][]OnMessageReceived
+
+type Subscribed struct{
+	Map map[string][]MessageListener
 }
 
-func (sd *SubscribedSafe) Init() {
-	sd.Map = make(map[string][]OnMessageReceived)
+func (sd *Subscribed) Init() {
+	sd.Map = make(map[string][]MessageListener)
 }
 
-func (sd *SubscribedSafe) Get(key string) ([]OnMessageReceived, bool){
-	defer sd.Unlock()
-	sd.Lock()
+func (sd *Subscribed) Get(key string) ([]MessageListener, bool){
 	l, found := sd.Map[key]
 	return l, found
 }
 
-func (sd *SubscribedSafe) Add(key string, fu OnMessageReceived){
-	defer sd.Unlock()
-	sd.Lock()
+func (sd *Subscribed) Add(key string, fu MessageListener){
 	_, f := sd.Map[key]
 	if (!f) {
-		sd.Map[key] = make([]OnMessageReceived,0)
+		sd.Map[key] = make([]MessageListener,0)
 	}
 
 	//Checking if this listener is not already in this list
@@ -50,7 +46,7 @@ func (sd *SubscribedSafe) Add(key string, fu OnMessageReceived){
 	sd.Map[key] = append(sd.Map[key], fu)
 }
 
-func (sd *SubscribedSafe) Remove(key string, fu OnMessageReceived) bool{
+func (sd *Subscribed) Remove(key string, fu MessageListener) bool{
 	f, e := sd.Map[key]
 
 	if(!e){
@@ -134,7 +130,7 @@ type Connection struct{
 	ReceiverConnection ClientRequestHandler
 	SenderConnection ClientRequestHandler
 
-	Subscribed SubscribedSafe
+	Subscribed Subscribed
 	WaitingACK WaitingACKSafe
 
 	Sessions []TopicSession
@@ -225,19 +221,19 @@ func (cnn *Connection) SendMessage(msg Message) error{
 	return nil
 }
 
-func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu OnMessageReceived){
+func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu MessageListener){
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
 	cnn.Subscribed.Add(topic.GetTopicName(), fu)
 }
 
-func (cnn *Connection) UnsubscribeSessionToDestination(topic Topic, fu OnMessageReceived) bool{
+func (cnn *Connection) UnsubscribeSessionToDestination(topic Topic, fu MessageListener) bool{
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
 	return cnn.Subscribed.Remove(topic.GetTopicName(), fu)
 }
 
-func (cnn *Connection) Subscribe(topic Topic, fu OnMessageReceived) error{
+func (cnn *Connection) Subscribe(topic Topic, fu MessageListener) error{
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -252,7 +248,7 @@ func (cnn *Connection) Subscribe(topic Topic, fu OnMessageReceived) error{
 	return cnn.SenderConnection.Send(pkt)
 }
 
-func (cnn *Connection) Unsubscribe(topic Topic, fu OnMessageReceived) error{
+func (cnn *Connection) Unsubscribe(topic Topic, fu MessageListener) error{
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -362,11 +358,12 @@ func (cnn *Connection) ProcessACKS(){
 	}()
 }
 
-func (cnn Connection) OnPacketReceived(pkt Packet){
+func (cnn Connection) OnPacket(pkt Packet){
 	fmt.Println(pkt)
+	fmt.Println(cnn.ClientID)
 }
 
-func (cnn *Connection) Start(){
+func (cnn Connection) Start(){
 	if(!cnn.Open){
 		tries := 0
 		for tries <= 5 {

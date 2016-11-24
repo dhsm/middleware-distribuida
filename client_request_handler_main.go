@@ -34,6 +34,7 @@ func main(){
   // crh.SendAsync(pkt)
 
   var pktReceived Packet
+  println("OI")
   pktReceived, err = crh.Receive()
   if(err != nil){
     fmt.Println(err)
@@ -45,7 +46,7 @@ func main(){
   crh.SendAsync(pkt)
   cnn := Connection{}
   cnn.CreateConnection("127.0.0.1", "8081", "tcp")
-  crh.SetConnection(cnn)
+  crh.SetConnection(&cnn)
   crh.ListenIncomingPackets()
   println("Waiting 20 before end execution...")
   time.Sleep(time.Second * 20)
