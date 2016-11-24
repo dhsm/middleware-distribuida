@@ -29,15 +29,14 @@ func (tsession *TopicSession) createPublisherInternal(tpc Topic) interface{} {
   return tpublisher
 }
 
-func (tsession *TopicSession) CreateSubscriber(tpc Topic) TopicSubscriber {
+func (tsession *TopicSession) CreateTopicSubscriber(tpc Topic) TopicSubscriber {
   return tsession.createSubscriberInternal(tpc).(TopicSubscriber)
 }
 
 func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
   tsubscriber := TopicSubscriber{}
   tsubscriber.CreateTopicSubscriber(tpc, tsession)
-  //TODO call subscribe
-  //tsession.MyConnectionSendMessage.Subscribe(tpc, tsession)
+  tsession.MyConnectionSendMessage.SubscribeSessionToDestination(tpc, tsession.MyMessageListener)
 
   var mu sync.Mutex
 

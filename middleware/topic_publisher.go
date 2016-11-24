@@ -6,6 +6,7 @@ type TopicPublisher struct {
   MyTopic Topic
   SessionSend *TopicSession
   MessageListener MessageListener
+  ClientID string
 }
 
 func (tpublisher *TopicPublisher) CreateTopicPublisher(topic Topic, session *TopicSession){
