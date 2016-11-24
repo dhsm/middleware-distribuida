@@ -119,8 +119,6 @@ func (crh *ClientRequestHandler) Close() error{
 	if (err != nil){
 		log.Print("Erro closing connection. ", err)
 	}
-
-
 	return err
 }
 
