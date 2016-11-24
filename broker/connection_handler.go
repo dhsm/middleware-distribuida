@@ -82,13 +82,19 @@ func (ch *ConnectionHandler) Receive () (Packet, error){
 	defer ch.Unlock()
 	ch.Lock()
 	size := make([]byte, 3)
-	io.ReadFull(ch.Connection,size)
-	_ = json.Unmarshal(size, &masPktSize)
+	_, err = io.ReadFull(ch.Connection,size)
+	if(err != nil){
+		return err
+	}
+	err := json.Unmarshal(size, &masPktSize)
 	packetMsh := make([]byte, masPktSize)
-	io.ReadFull(ch.Connection,packetMsh)
-	_ = json.Unmarshal(packetMsh, &pkt)
+	_, err = io.ReadFull(ch.Connection,packetMsh)
+	if(err != nil){
+		return err
+	}
+	err = json.Unmarshal(packetMsh, &pkt)
 
-	return pkt, nil
+	return pkt, err
 }
 
 func (ch *ConnectionHandler) HandleRegister () error {
