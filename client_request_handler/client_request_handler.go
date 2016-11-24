@@ -79,7 +79,7 @@ func (crh *ClientRequestHandler) Receive () (Packet, error){
 	return pkt, nil
 }
 
-func (crh *ClientRequestHandler) SendAndReceive (pkt Packet) (Packet, error){
+func (crh *ClientRequestHandler) SendAndReceive(pkt Packet) (Packet, error){
 	err := crh.Send(pkt)
 	if (err != nil){
 		return Packet{}, nil

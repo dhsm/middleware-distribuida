@@ -6,7 +6,7 @@ import "time"
 import "log"
 import "errors"
 import "reflect"
-// import "fmt"
+ // import "fmt"
 
 import "github.com/nu7hatch/gouuid"
 
@@ -94,8 +94,8 @@ type Connection struct{
 
 func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_protocol string){
 	cnn.Lock = sync.Mutex{}
-	cnn.MessageSent = sync.Cond{L: &cnn.Lock}
-	cnn.AckReceived = sync.Cond{L: &cnn.Lock}
+	cnn.MessageSent = sync.Cond{L: &sync.Mutex{}}
+	cnn.AckReceived = sync.Cond{L: &sync.Mutex{}}
 
 	cnn.HostIp = host_ip
 	cnn.HostPort = host_port
@@ -113,7 +113,8 @@ func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_p
 
 func (cnn *Connection) IsOpen() error{
 	if (!cnn.Open){
-		return errors.New("Operation not allowed in closed connection.")
+		return errors.Errorf("Operation not allowed in closed connection.")
+		// return errors.New("Operation not allowed in closed connection.")
 	}
 	return nil
 }
@@ -137,7 +138,7 @@ func (cnn *Connection) SetClientID(clientid string) error{
 
 func (cnn *Connection) Close(){
 	cnn.SetModified()
-	cnn.Lock.Lock()
+	cnn.AckReceived.L.Lock()
 	cnn.Open = false
 
 	for cnn.WaitingACK.Len() > 0{
@@ -147,7 +148,7 @@ func (cnn *Connection) Close(){
 	cnn.ReceiverConnection.Close()
 	cnn.SenderConnection.Close()
 
-	cnn.Lock.Unlock()
+	cnn.AckReceived.L.Unlock()
 }
 
 func (cnn Connection) CreateSession() TopicSession{
@@ -161,16 +162,16 @@ func (cnn Connection) CreateSession() TopicSession{
 func (cnn *Connection) SendMessage(msg Message) error{
 	err := cnn.IsOpen()
 	if(err != nil){
-		log.Print(err)
+		log.Print(err.(*errors.Error).ErrorStack())
 		return err
 	}
 
 	cnn.WaitingACK.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
 
-	cnn.Lock.Lock()
+	cnn.MessageSent.L.Lock()
 	//Broadcasting that there is new messages waiting for an ACK
 	cnn.MessageSent.Broadcast()
-	cnn.Lock.Unlock()
+	cnn.MessageSent.L.Unlock()
 
 	cnn.SetModified()
 
@@ -272,6 +273,7 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 func (cnn *Connection) ProcessACKS(){
 	go func () {
 		for{
+			print("ProcessACKS")
 			err := cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -279,8 +281,9 @@ func (cnn *Connection) ProcessACKS(){
 			}
 
 			if (cnn.WaitingACK.Len() == 0){
-				cnn.Lock.Lock()
+				cnn.MessageSent.L.Lock()
 
+				print("ProcessACKS")
 				err := cnn.IsOpen()
 				if(err != nil){
 					log.Print(err)
@@ -288,9 +291,10 @@ func (cnn *Connection) ProcessACKS(){
 				}
 
 				cnn.MessageSent.Wait() //Waiting for messages to be sent before stat to process ACKS again
-				cnn.Lock.Unlock()
+				cnn.MessageSent.L.Unlock()
 			}
 
+			print("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -308,6 +312,7 @@ func (cnn *Connection) ProcessACKS(){
 				}
 			}
 
+			print("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)

@@ -14,7 +14,7 @@ func printReceivedPackets(pkt Packet){
 func main(){
   println("Starting Client Request Handler...")
   crh := ClientRequestHandler{}
-  err := crh.NewCRH("tcp", "127.0.0.1", "8081", false, "JKDASBDK088a1asd")
+  err := crh.NewCRH("tcp", "127.0.0.1", "8082", false, "JKDASBDK088a1asd")
 
   if (err != nil){
     return
@@ -23,7 +23,7 @@ func main(){
   println("Creating message...")
   msg := Message{}
   msg.CreateMessage("Hi Server!", "notopic", 99, "semid")
-  
+
   println("Creating packet...")
   pkt := Packet{}
   params := []string{"arg0", "arg1", "arg2"}

@@ -14,7 +14,7 @@ func (tpcManager *TopicManager) CreateTopicManager(){
   tpcManager.ActiveTopics = make([]string,0)
 }
 
-func (tpcManager *TopicManager) Create(topic_name string){
+func (tpcManager *TopicManager) CreateTopic(topic_name string){
   node := Node{}
   node.CreateNode(topic_name)
 }

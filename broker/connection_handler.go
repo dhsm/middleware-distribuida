@@ -1,17 +1,20 @@
 package broker
 
 import "net"
+import "io"
 import "errors"
 import "time"
 import "log"
+import "sync"
+import "encoding/json"
 
-import . "../client_request_handler"
 import . "../message"
+import . "../packet"
 
 type HandleType uint
 
 const (
-	UNKNOWN Operation = iota
+	UNKNOWN HandleType = iota
 	SENDER
 	RECEIVER)
 
@@ -43,7 +46,6 @@ type ConnectionHandler struct{
 	Type HandleType
 	ClientID string
 	ToSend chan Packet
-	ClientID string
 	WaitingACK WaitingACKSafe
 }
 
@@ -53,8 +55,9 @@ func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
 	ch.Running = false
 	ch.Type = UNKNOWN
 	ch.ToSend = make(chan Packet, 50)
-	ch.WaitingACK{}
+	ch.WaitingACK = WaitingACKSafe{}
 	ch.WaitingACK.Init()
+	ch.Server = server
 }
 
 func (ch *ConnectionHandler) Send(pkt Packet) error{
@@ -102,7 +105,7 @@ func (ch *ConnectionHandler) HandleRegister () error {
 
 	if(pkt.IsRegisterReceiver()){
 		ch.ClientID = pkt.GetClientID()
-		return ch.HandleRegisterReceiver(pkt)	
+		return ch.HandleRegisterReceiver(pkt)
 	}
 
 	return errors.New("Expecting a REGISTER_CONSUMER or REGISTER_PRODUCER packet.")
@@ -113,10 +116,10 @@ func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 	ch.Type = SENDER
 
 	//Creating ACK response
-	pkt := Packet{}
+	pkt = Packet{}
 	params := []string{ch.ClientID}
 	pkt.CreatePacket(REGISTER_SENDER_ACK, 0, params, Message{})
-	err := ch.Send(pkt) 
+	err := ch.Send(pkt)
 
 	ch.Server.HandleRegisterSender(pkt, ch.ID)
 
@@ -129,10 +132,10 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 	ch.Type = RECEIVER
 
 	//Creating ACK response
-	pkt := Packet{}
+	pkt = Packet{}
 	params := []string{ch.ClientID}
 	pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, Message{})
-	err := ch.Send(pkt) 
+	err := ch.Send(pkt)
 
 	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
 
@@ -191,28 +194,37 @@ func (ch *ConnectionHandler) HandleReceivedMessages () error{
 	}
 
 	if(pkt.IsACK()){
-
+		return nil
 	}
+	return nil
 }
 
-func (ch *ConnectionHandler) SendMessages () error{
+func (ch ConnectionHandler) SendMessages () error{
 	pkt := <-ch.ToSend
 	err := ch.Send(pkt)
 
 	if(pkt.IsMessage()){
-		log.Print("Sending message ", pkt.GetMessageID()," to client " , ch.ClientID)
-		msg = pkt.GetMessage()
-		ch.Server.Receivers[ch.ClientID].GetWaitingAck().Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
-		log.Print("Received ack [id: " , pkt.GetMessageID() , "] [size: " , ch.Server.Receivers[ch.ClientID].GetWaitingAck().Len(), "]")
+		log.Print("Sending message ", pkt.GetMessage()," to client " , ch.ClientID)
+		msg := pkt.GetMessage()
+		//ch.Server.Receivers[ch.ClientID].GetWaitingAck().Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
+		teste := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+		teste.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
+		//log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , ch.Server.Receivers[ch.ClientID].GetWaitingAck().Len(), "]")
+		teste_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , teste_2.Len(), "]")
 	}
+	return err
 }
 
 func (ch *ConnectionHandler) handleACK (pkt Packet){
-	log.Print("Received ack [id: " , pkt.GetMessageID() , "] [size: " , ch.Server.Receivers[ch.ClientID].GetWaitingAck().Len(), "]")
-	ch.Server.Receivers[ch.ClientID].GetWaitingAck().Remove(pkt.GetID())
-	log.Print("Received ack [id: " , pkt.GetMessageID() , "] [size: " , ch.Server.Receivers[ch.ClientID].GetWaitingAck().Len(), "]")
+	temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp.Len(), "]")
+	temp_3 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	temp_3.Remove(pkt.GetMessage().MessageID)
+	temp_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
-func (ch *ConnectionHandler) GetWaitingAck () WaitingACK{
+func (ch *ConnectionHandler) GetWaitingAck() WaitingACKSafe{
 	return ch.WaitingACK
 }
