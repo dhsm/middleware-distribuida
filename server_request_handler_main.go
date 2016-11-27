@@ -2,46 +2,36 @@ package main
 
 import . "./message"
 import . "./packet"
-import . "./server_request_handler"
-import "fmt"
-// import "time"
+import . "./client_request_handler"
+
+import "strconv"
 
 func main(){
-  srh := ServerRequestHandler{}
-  srh.NewSRH("tcp", "127.0.0.1:8081")
+  srh := ClientRequestHandler{}
+  srh.NewCRHS("tcp", ":8082")
 
-  pktReceived := srh.Receive()
-  fmt.Println(pktReceived)
+  for{
+    pktRCV, err := srh.Receive()
 
-  
-  msg := Message{}
+    if(err != nil){
+      panic(err)
+    }
 
-  println("Creating response packet...")
-  pkt := Packet{}
-  params := []string{}
-  if(pktReceived.GetType() == REGISTER_SENDER){
-    pkt.CreatePacket(REGISTER_SENDER_ACK, 0, params, msg)  
-  }else if(pktReceived.GetType() == REGISTER_RECEIVER){
-    pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, msg)  
-  }else{
-    pkt.CreatePacket(MESSAGE, 0, params, msg)
-  }
-  srh.Send(pkt)
+    ret, err := strconv.Atoi(pktRCV.GetMessage().MsgText)
 
-  pktReceived = srh.Receive()
-  println("Creating response message...")
-  msg.CreateMessage("Hi Client", "notopic", 99, "semid")
-  pkt.CreatePacket(MESSAGE, 0, params, msg)
-  srh.Send(pkt)
+    if(err != nil){
+      panic(err)
+    }
 
-  println("Vou dormir")
-  // time.Sleep(time.Second * 5)
+    ret++
 
-  println("Acordei!")
+    msg := Message{}
+    msg.CreateMessage(strconv.Itoa(ret), "replay", ret, "server01")
 
-  for i := 0;; i++ {
-    println("Sending packet...")
-    pkt.CreatePacket(MESSAGE, uint(i), params, msg)
+    pkt := Packet{}
+    params := []string{}
+    pkt.CreatePacket(ACK, ret-1, params, msg)
+
     srh.Send(pkt)
   }
 }

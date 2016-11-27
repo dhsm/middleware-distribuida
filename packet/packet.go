@@ -44,14 +44,14 @@ func (op Operation) Values() *[]string {
 
 type Packet struct{
 	Operation Operation
-	ID uint
+	ID int
 	Params []string
 	Msg Message
 	TimeStamp int32
 	Index int //This is necessary because we are using a PriorityQueue
 }
 
-func (pkt *Packet) CreatePacket(op Operation, id uint, params []string, msg Message){
+func (pkt *Packet) CreatePacket(op Operation, id int, params []string, msg Message){
 	pkt.Operation = op
 	pkt.ID = id
 	pkt.Params = params
@@ -68,7 +68,7 @@ func (pkt *Packet) SetOperation(operation Operation){
 	pkt.Operation = operation
 }
 
-func (pkt *Packet) GetID() uint{
+func (pkt *Packet) GetID() int{
 	return pkt.ID
 }
 
@@ -76,7 +76,7 @@ func (pkt *Packet) GetClientID() string{
 	return pkt.Params[0]
 }
 
-func (pkt *Packet) SetID(id uint){
+func (pkt *Packet) SetID(id int){
 	pkt.ID = id
 }
 
