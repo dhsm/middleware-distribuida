@@ -89,7 +89,7 @@ type Connection struct{
 	Open bool
 	Modified bool
 
-	PacketIDGenerator uint
+	PacketIDGenerator int
 }
 
 func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_protocol string){

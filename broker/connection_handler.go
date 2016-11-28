@@ -52,7 +52,7 @@ type ConnectionHandler struct{
 func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
 	ch.ID = id
 	ch.Connection = conn
-	ch.Running = false
+	ch.Running = true
 	ch.Type = UNKNOWN
 	ch.ToSend = make(chan Packet, 50)
 	ch.WaitingACK = WaitingACKSafe{}
@@ -158,11 +158,13 @@ func (ch *ConnectionHandler) Execute () {
 		if(ch.Type == SENDER){
 			err = ch.HandleReceivedMessages()
 			if(err != nil){
+				log.Print(err)
 				ch.Running = false
 			}
 		}else if(ch.Type == RECEIVER){
 			err = ch.SendMessages()
 			if(err != nil){
+				log.Print(err)
 				ch.Running = false
 			}
 		}

@@ -2,6 +2,8 @@ package main
 
 import . "../middleware"
 
+import "time"
+
 func main() {
   conn := Connection{}
   conn.CreateConnection("127.0.0.1", "8082", "tcp")
@@ -23,4 +25,8 @@ func main() {
 
   publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
   publisher.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
+
+
+  time.Sleep(time.Second * 3000)
+
 }

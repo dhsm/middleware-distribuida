@@ -6,8 +6,8 @@ import "sync"
 import "io"
 // import "fmt"
 import "encoding/json"
-import "math/rand"
-import "time"
+// import "math/rand"
+// import "time"
 import "strconv"
 import "strings"
 
@@ -24,49 +24,49 @@ type ClientRequestHandler struct {
 	CNN PacketListener
 	RemoteAddr string
 	Protocol string
-	IsSubscriber bool
+	Subscriber bool
 	ClientID string
 }
 
 func (crh *ClientRequestHandler) NewCRH(protocol string, host string, port string, isSubscriber bool, clientID string) error{
 	conn, err := net.Dial(protocol, net.JoinHostPort(host, port))
 
-	if (err != nil){
-		log.Fatal(err)
-		return err
-	}
+	// if (err != nil){
+	// 	log.Fatal(err)
+	// 	return err
+	// }
 
 	crh.ConnectionSend = conn
+	crh.ConnectionReceive = conn
 	crh.Closed = false
 
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	tries := 50
-	rport := 0
-	for tries > 0 {
-		rport = int((r.Int()%10000)+2000)
-		// println("Listerning on...")
-		// println(strings.Split(conn.LocalAddr().String(),":")[0]+":"+strconv.Itoa(rport))
-		ln, err := net.Listen(protocol, strings.Split(conn.LocalAddr().String(),":")[0]+":"+strconv.Itoa(rport))
+	// tries := 50
+	// rport := 0
+	// for tries > 0 {
+	// 	rport = int((r.Int()%10000)+2000)
+	// 	// println("Listerning on...")
+	// 	// println(strings.Split(conn.LocalAddr().String(),":")[0]+":"+strconv.Itoa(rport))
+	// 	ln, err := net.Listen(protocol, strings.Split(conn.LocalAddr().String(),":")[0]+":"+strconv.Itoa(rport))
 
-		tries--
+	// 	tries--
 
-		if(err == nil && ln != nil){
-			tries = 0
-			crh.Listen = ln
-			break
-		}else{
-			log.Fatal(err)
-		}
-	}
-
-	// crh.RPort = port
+	// 	if(err == nil && ln != nil){
+	// 		tries = 0
+	// 		crh.Listen = ln
+	// 		break
+	// 	}else{
+	// 		log.Fatal(err)
+	// 	}
+	// }
+	
 	crh.RemoteAddr = net.JoinHostPort(host, port)
 	crh.Protocol = protocol
 
-	encoded_port, err := json.Marshal(rport)
-	crh.ConnectionSend.Write(encoded_port)
-	crh.ConnectionSend.Close()
+	// encoded_port, err := json.Marshal(rport)
+	// crh.ConnectionSend.Write(encoded_port)
+	// crh.ConnectionSend.Close()
 
 	if (err != nil){
 		log.Fatal("Error stablishing connection to: ", host, " at port ", port, " using ", protocol, " protocol.")
@@ -111,6 +111,7 @@ func (crh *ClientRequestHandler) NewCRHS(protocol string, port string) error{
 
 	crh.Listen = ln
 	crh.ConnectionReceive = conn
+	crh.ConnectionSend = conn
 	crh.Protocol = protocol
 
 	rport := 0
@@ -132,7 +133,7 @@ func (crh *ClientRequestHandler) NewCRHS(protocol string, port string) error{
 	}
 
 	crh.RemoteAddr = strings.Split(conn.RemoteAddr().String(),":")[0]+":"+strconv.Itoa(rport)
-	crh.ConnectionReceive.Close()
+	// crh.ConnectionReceive.Close()
 	
 	err = crh.ReceiveType()
 
@@ -157,16 +158,16 @@ func (crh ClientRequestHandler) Send(pkt Packet) error{
 
 	println("Sengind new packet to", crh.RemoteAddr)
 
-	conn, err := net.Dial(crh.Protocol, crh.RemoteAddr)
+	// conn, err := net.Dial(crh.Protocol, crh.RemoteAddr)
 
-	println(crh.Protocol)
+	// println(crh.Protocol)
 
-	if (err != nil){
-		log.Fatal(err)
-		return err
-	}
+	// if (err != nil){
+	// 	log.Fatal(err)
+	// 	return err
+	// }
 
-	crh.ConnectionSend = conn
+	// crh.ConnectionSend = conn
 	
 	encoded, err := json.Marshal(pkt)
 	
@@ -184,7 +185,7 @@ func (crh ClientRequestHandler) Send(pkt Packet) error{
 
 	crh.ConnectionSend.Write(encoded_size)
 	crh.ConnectionSend.Write(encoded)
-	crh.ConnectionSend.Close()
+	// crh.ConnectionSend.Close()
 
 	crh.S.Unlock()
 
@@ -196,13 +197,13 @@ func (crh ClientRequestHandler) Send(pkt Packet) error{
 func (crh ClientRequestHandler) Receive () (Packet, error){
 	crh.R.Lock()
 
-	conn, err := crh.Listen.Accept()
+	// conn, err := crh.Listen.Accept()
 
-	if(err!=nil){
-		log.Fatal(err)
-	}
+	// if(err!=nil){
+	// 	log.Fatal(err)
+	// }
 
-	crh.ConnectionReceive = conn
+	// crh.ConnectionReceive = conn
 
 	println("Esperando pacote de", crh.ConnectionReceive.RemoteAddr().String())
 
@@ -213,7 +214,7 @@ func (crh ClientRequestHandler) Receive () (Packet, error){
 	
 	size := make([]byte, 3)
 	
-	_, err = io.ReadFull(crh.ConnectionReceive,size)
+	_, err := io.ReadFull(crh.ConnectionReceive,size)
 	
 	if(err!=nil){
 		log.Fatal(err)
@@ -229,7 +230,7 @@ func (crh ClientRequestHandler) Receive () (Packet, error){
 	
 	_, err = io.ReadFull(crh.ConnectionReceive,packetMsh)
 
-	crh.ConnectionReceive.Close()
+	// crh.ConnectionReceive.Close()
 	
 	crh.R.Unlock()
 
@@ -270,9 +271,9 @@ func (crh ClientRequestHandler) ReceiveType() error{
 	pkt, err := crh.Receive()
 
 	if(pkt.IsRegisterReceiver()){
-		crh.IsSubscriber = true
+		crh.Subscriber = true
 	}else{
-		crh.IsSubscriber = false
+		crh.Subscriber = false
 	}
 
 	crh.ClientID = pkt.GetParams()[0]
@@ -283,7 +284,7 @@ func (crh ClientRequestHandler) SendACK() error{
 	pkt := Packet{}
 	msg := Message{}
 	params := []string{}
-	if (crh.IsSubscriber){
+	if (crh.Subscriber){
 		pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, msg)
 	}else{
 		pkt.CreatePacket(REGISTER_SENDER_ACK, 0, params, msg)
@@ -364,4 +365,12 @@ func (crh ClientRequestHandler) SetConnection(connection PacketListener){
 	crh.R.Lock()
 	crh.CNN = connection
 	crh.R.Unlock()
+}
+
+func (crh ClientRequestHandler) GetClientID() string{
+	return crh.ClientID
+}
+
+func (crh ClientRequestHandler) IsSubscriber() bool{
+	return crh.Subscriber
 }

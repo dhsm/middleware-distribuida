@@ -1,7 +1,8 @@
 package broker
   
 import "net"
-import "fmt"
+// import "fmt"
+import "log"
 import . "../packet"
 import . "../message"
 import . "../topic_manager"
@@ -35,10 +36,9 @@ func (server *Server) CreateServer(port string) {
 
 func (server *Server) Init() {
   for{
-    fmt.Println(server.Senders)
-    println("waiting connection")
+    println("Waiting for a new Connection...")
     conn, _ := server.Listener.Accept()
-    //server.MyServerSocket = conn
+    log.Print("new connetion from ", conn.RemoteAddr())
     id := server.getNextInt()
     connHandler := ConnectionHandler{}
     connHandler.NewCH(id,conn,*server)
