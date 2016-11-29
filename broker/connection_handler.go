@@ -39,26 +39,89 @@ func (ht HandleType) Values() *[]string {
 
 type ConnectionHandler struct{
 	sync.Mutex
-	Server Server
 	ID int
+	Server Server
 	Connection net.Conn
 	Running bool
 	Type HandleType
-	ClientID string
 	ToSend chan Packet
 	WaitingACK WaitingACKSafe
+	ClientID string
 }
 
 func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
 	ch.ID = id
 	ch.Connection = conn
+	ch.Server = server
 	ch.Running = true
 	ch.Type = UNKNOWN
 	ch.ToSend = make(chan Packet, 50)
 	ch.WaitingACK = WaitingACKSafe{}
 	ch.WaitingACK.Init()
-	ch.Server = server
+	
 }
+
+func (ch *ConnectionHandler) Execute () {
+	err := ch.HandleRegister()
+	if(err != nil){
+		ch.Running = false
+	}
+
+	for ch.Running{
+		if(ch.Type == SENDER){
+			err = ch.HandleReceivedMessages()
+		}else if(ch.Type == RECEIVER){
+			err = ch.SendMessages()
+		}
+
+		if(err != nil){
+			log.Print(err)
+			ch.Running = false
+		}
+	}
+
+	ch.Connection.Close()
+}
+
+func (ch *ConnectionHandler) HandleReceivedMessages () error{
+	println("*** ConnectionHandler HandleReceivedMessages")
+
+	pkt, err := ch.Receive()
+
+	if(err != nil){
+		return err
+	}
+
+	if(pkt.IsSubscribe()){
+		ch.Server.HandleSubscribe(pkt)
+		return nil
+	}else if(pkt.IsUnsubscribe()){
+		ch.Server.HandleUnsubscribe(pkt)
+		return nil
+	}else if(pkt.IsCreateTopic()){
+		ch.Server.HandleCreateTopic(pkt)
+		return nil
+	}else if(pkt.IsMessage()){
+		ch.Server.HandleMessage(pkt)
+		return nil
+	}else if(pkt.IsACK()){
+		return nil
+	}
+	return nil
+}
+
+func (ch *ConnectionHandler) handleACK (pkt Packet){
+	println("*** ConnectionHandler handleACK")
+
+	log.Print("Received ack for message ", pkt.GetMessage().MessageID, " from client ", pkt.GetClientID())
+	temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp.Len(), "]")
+	temp_3 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	temp_3.Remove(pkt.GetMessage().MessageID)
+	temp_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
+}
+
 
 func (ch *ConnectionHandler) Send(pkt Packet) error{
 
@@ -98,7 +161,10 @@ func (ch *ConnectionHandler) Receive () (Packet, error){
 }
 
 func (ch *ConnectionHandler) HandleRegister () error {
+	println("*** ConnectionHandler HandleRegister")
+	
 	pkt, err := ch.Receive()
+
 	if(err != nil){
 		log.Print("Error receiving Registration ", err)
 		return err
@@ -132,7 +198,6 @@ func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 	return err
 }
 
-
 func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 	log.Print("Producer registered ", ch.ID)
 	ch.Type = RECEIVER
@@ -146,65 +211,6 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
 
 	return err
-}
-
-func (ch *ConnectionHandler) Execute () {
-	err := ch.HandleRegister()
-	if(err != nil){
-		ch.Running = false
-	}
-
-	for ch.Running{
-		if(ch.Type == SENDER){
-			err = ch.HandleReceivedMessages()
-			if(err != nil){
-				log.Print(err)
-				ch.Running = false
-			}
-		}else if(ch.Type == RECEIVER){
-			err = ch.SendMessages()
-			if(err != nil){
-				log.Print(err)
-				ch.Running = false
-			}
-		}
-	}
-
-	ch.Connection.Close()
-
-}
-
-func (ch *ConnectionHandler) HandleReceivedMessages () error{
-	pkt, err := ch.Receive()
-
-	if(err != nil){
-		return err
-	}
-
-	if(pkt.IsSubscribe()){
-		ch.Server.HandleSubscribe(pkt)
-		return nil
-	}
-
-	if(pkt.IsUnsubscribe()){
-		ch.Server.HandleUnsubscribe(pkt)
-		return nil
-	}
-
-	if(pkt.IsCreateTopic()){
-		ch.Server.HandleCreateTopic(pkt)
-		return nil
-	}
-
-	if(pkt.IsMessage()){
-		ch.Server.HandleMessage(pkt)
-		return nil
-	}
-
-	if(pkt.IsACK()){
-		return nil
-	}
-	return nil
 }
 
 func (ch ConnectionHandler) SendMessages () error{
@@ -222,15 +228,6 @@ func (ch ConnectionHandler) SendMessages () error{
 		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , teste_2.Len(), "]")
 	}
 	return err
-}
-
-func (ch *ConnectionHandler) handleACK (pkt Packet){
-	temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp.Len(), "]")
-	temp_3 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	temp_3.Remove(pkt.GetMessage().MessageID)
-	temp_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
 func (ch *ConnectionHandler) GetWaitingAck() WaitingACKSafe{

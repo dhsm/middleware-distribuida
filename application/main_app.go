@@ -10,7 +10,7 @@ func main() {
   conn.Start()
 
   session := TopicSession{}
-  session.CreateSession(conn)
+  // session.CreateSession(conn)
 
   topic := session.CreateTopic("arborismo")
 
