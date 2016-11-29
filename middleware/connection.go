@@ -364,7 +364,7 @@ func (cnn Connection) Start(){
 		tries := 0
 		for tries <= 5 {
 			tries++
-			errr := cnn.ReceiverConnection.NewCRH(cnn.HostProtocol, cnn.HostIp, cnn.HostPort, false, cnn.GetClientID())
+			errr := cnn.ReceiverConnection.NewCRH(cnn.HostProtocol, cnn.HostIp, cnn.HostPort, true, cnn.GetClientID())
 			errs := cnn.SenderConnection.NewCRH(cnn.HostProtocol, cnn.HostIp, cnn.HostPort, false, cnn.GetClientID())
 
 			if(errr != nil || errs != nil){
