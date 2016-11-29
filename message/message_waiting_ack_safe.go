@@ -42,5 +42,18 @@ func (was *WaitingACKSafe) Peek() (string, MessageWaitingAck, bool){
 	for k, e := range was.Map {
 		return k, e, true
 	}
+
+	return "", MessageWaitingAck{}, false
+}
+
+func (was *WaitingACKSafe) Pool() (string, MessageWaitingAck, bool){
+	defer was.Unlock()
+	was.Lock()
+
+	for k, e := range was.Map {
+		delete(was.Map,k)
+		return k, e, true
+	}
+
 	return "", MessageWaitingAck{}, false
 }
