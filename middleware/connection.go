@@ -271,7 +271,7 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 func (cnn *Connection) ProcessACKS(){
 	go func () {
 		for{
-			print("ProcessACKS")
+			println("ProcessACKS")
 			err := cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -281,7 +281,7 @@ func (cnn *Connection) ProcessACKS(){
 			if (cnn.WaitingACK.Len() == 0){
 				cnn.MessageSent.L.Lock()
 
-				print("ProcessACKS")
+				println("ProcessACKS")
 				err := cnn.IsOpen()
 				if(err != nil){
 					log.Print(err)
@@ -292,7 +292,7 @@ func (cnn *Connection) ProcessACKS(){
 				cnn.MessageSent.L.Unlock()
 			}
 
-			print("ProcessACKS")
+			println("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -310,7 +310,7 @@ func (cnn *Connection) ProcessACKS(){
 				}
 			}
 
-			print("ProcessACKS")
+			println("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
