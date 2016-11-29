@@ -65,7 +65,7 @@ func (tsession *TopicSession) CreateTopic(topicname string) Topic{
   topic := Topic{}
   topic.CreateTopic(topicname)
   //TODO call createtopic
-  //tsession.MyConnectionSendMessage.CreateTopic(topic)
+  tsession.MyConnectionSendMessage.CreateTopic(topic)
   return topic
 }
 

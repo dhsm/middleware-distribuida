@@ -24,7 +24,7 @@ func main() {
   //subscriber1.SetMessageListener()
 
   publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
-  publisher.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
+  //publisher.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
 
 
   time.Sleep(time.Second * 3000)
