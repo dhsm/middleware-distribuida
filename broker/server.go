@@ -1,5 +1,5 @@
 package broker
-  
+
 import "net"
 // import "fmt"
 import "log"
@@ -32,6 +32,7 @@ func (server *Server) CreateServer(port string) {
   ln, _ := net.Listen("tcp", port)
 
   server.Listener = ln
+  println("==> Server created!")
 }
 
 func (server *Server) Init() {
@@ -54,26 +55,32 @@ func (server *Server) getNextInt() int{
 }
 
 func (server *Server) HandleRegisterSender(pkt Packet, id int){
+  println("*** Server handle[SENDER]")
   server.Senders[pkt.GetClientID()] = server.Handlers[id]
 }
 
 func (server *Server) HandleRegisterReceiver(pkt Packet, id int){
+  println("*** Server handle[RECEIVER]")
   server.Receivers[pkt.GetClientID()] = server.Handlers[id]
 }
 
 func (server *Server) HandleSubscribe(pkt Packet){
+  println("*** Server handle[SUBSCRIBE]")
   server.MyTopicManager.Subscribe(pkt.GetMessage().Destination, pkt.GetClientID())
 }
 
 func (server *Server) HandleUnsubscribe(pkt Packet){
+  println("*** Server handle[UNSUBSCRIBE]")
   server.MyTopicManager.Unsubscribe(pkt.GetMessage().Destination, pkt.GetClientID())
 }
 
 func (server *Server) HandleCreateTopic(pkt Packet){
+  println("*** Server handle[CREATETOPIC]")
   server.MyTopicManager.CreateTopic(pkt.GetMessage().Destination)
 }
 
 func (server *Server) HandleMessage(pkt Packet){
+  println("*** Server handle[MESSAGE]")
   topic := pkt.GetMessage().Destination
   server.MyTopicManager.AddMessageToTopic(topic, pkt.GetMessage())
 
