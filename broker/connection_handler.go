@@ -50,7 +50,7 @@ type ConnectionHandler struct{
 }
 
 func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
-	println("==> Connection created!")
+	println("==> ConnectionHandle created!")
 
 	ch.ID = id
 	ch.Connection = conn
