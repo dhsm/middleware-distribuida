@@ -92,25 +92,32 @@ func (ch *ConnectionHandler) HandleReceivedMessages() error{
 
 	pkt, err := ch.Receive()
 
+	println("@@@ ConnectionHandler BACK TO handle[RECEIVED_MESSAGES]")
 	if(err != nil){
 		return err
 	}
 
 	if(pkt.IsSubscribe()){
+		println("@@@ ConnectionHandler packet was::: SUBSCRIBE")
 		ch.Server.HandleSubscribe(pkt)
 		return nil
 	}else if(pkt.IsUnsubscribe()){
+		println("@@@ ConnectionHandler packet was::: UNSUBSCRIBE")
 		ch.Server.HandleUnsubscribe(pkt)
 		return nil
 	}else if(pkt.IsCreateTopic()){
+		println("@@@ ConnectionHandler packet was::: CREATE_TOPIC")
 		ch.Server.HandleCreateTopic(pkt)
 		return nil
 	}else if(pkt.IsMessage()){
+		println("@@@ ConnectionHandler packet was::: MESSAGE")
 		ch.Server.HandleMessage(pkt)
 		return nil
 	}else if(pkt.IsACK()){
+		println("@@@ ConnectionHandler packet was::: ACK")
 		return nil
 	}
+	println("@@@ ConnectionHandler packet was::: !!!NO PACKET!!!")
 	return nil
 }
 
@@ -220,7 +227,9 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 
 	defer ch.Unlock()
 	ch.Lock()
+	println("@@@ ConnectionHandler [RECEIVE] *we are inside Lock()*")
 	size := make([]byte, 3)
+	println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")
 	_, err := io.ReadFull(ch.Connection,size)
 
 	if(err != nil){
@@ -228,24 +237,24 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	}
 
 	err = json.Unmarshal(size, &masPktSize)
-	
+
 	if(err != nil){
 		log.Print(err)
 	}
-
+	println("@@@ ConnectionHandler [RECEIVE] *read size packet*")
 	packetMsh := make([]byte, masPktSize)
 	_, err = io.ReadFull(ch.Connection,packetMsh)
 
 	if(err != nil){
 		log.Print(err)
 	}
-
+	println("@@@ ConnectionHandler [RECEIVE] *read message packet*")
 	err = json.Unmarshal(packetMsh, &pkt)
 
 	if(err != nil){
 		log.Print(err)
 	}
-
+	println("@@@ ConnectionHandler [RECEIVE] *we will return now*")
 	return pkt, err
 }
 
