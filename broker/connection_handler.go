@@ -235,7 +235,7 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	if(err != nil){
 		log.Print(err)
 	}
-
+	println("@@@ ConnectionHandler [RECEIVE] *ReadFull, now will Unmarshall*")
 	err = json.Unmarshal(size, &masPktSize)
 
 	if(err != nil){
