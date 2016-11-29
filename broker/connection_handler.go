@@ -63,7 +63,7 @@ func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
 
 }
 
-func (ch *ConnectionHandler) Execute () {
+func (ch *ConnectionHandler) Execute() {
 	println("@@@ ConnectionHandler [EXECUTE]")
 
 	err := ch.HandleRegister()
@@ -87,7 +87,7 @@ func (ch *ConnectionHandler) Execute () {
 	ch.Connection.Close()
 }
 
-func (ch *ConnectionHandler) HandleReceivedMessages () error{
+func (ch *ConnectionHandler) HandleReceivedMessages() error{
 	println("@@@ ConnectionHandler handle[RECEIVED_MESSAGES]")
 
 	pkt, err := ch.Receive()
@@ -127,7 +127,7 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
-func (ch ConnectionHandler) SendMessages () error{
+func (ch ConnectionHandler) SendMessages() error{
 	println("@@@ ConnectionHandler send[MESSAGES]")
 	pkt := <-ch.ToSend
 	err := ch.Send(pkt)
@@ -142,50 +142,8 @@ func (ch ConnectionHandler) SendMessages () error{
 	return err
 }
 
-
-func (ch *ConnectionHandler) Send(pkt Packet) error{
-	println("@@@ ConnectionHandler [SEND]")
-
-	defer ch.Unlock()
-	ch.Lock()
-	encoded, err := json.Marshal(pkt)
-	encoded_size, err := json.Marshal(len(encoded))
-	ch.Connection.Write(encoded_size)
-	ch.Connection.Write(encoded)
-
-	if (err != nil){
-		log.Print("Encoding error sending packet", err)
-	}
-	return err
-}
-
-func (ch *ConnectionHandler) Receive () (Packet, error){
-	println("@@@ ConnectionHandler [RECEIVE]")
-
-	var pkt Packet
-	var masPktSize int64
-
-	defer ch.Unlock()
-	ch.Lock()
-	size := make([]byte, 3)
-	_, err := io.ReadFull(ch.Connection,size)
-	if(err != nil){
-		log.Print(err)
-	}
-	err = json.Unmarshal(size, &masPktSize)
-	packetMsh := make([]byte, masPktSize)
-	_, err = io.ReadFull(ch.Connection,packetMsh)
-	if(err != nil){
-		log.Print(err)
-	}
-	err = json.Unmarshal(packetMsh, &pkt)
-
-	return pkt, err
-}
-
-func (ch *ConnectionHandler) HandleRegister () error {
+func (ch *ConnectionHandler) HandleRegister() error {
 	println("@@@ ConnectionHandler handle[REGISTER]")
-
 
 	pkt, err := ch.Receive()
 
@@ -197,14 +155,28 @@ func (ch *ConnectionHandler) HandleRegister () error {
 	if (pkt.IsRegisterSender()){
 		ch.ClientID = pkt.GetClientID()
 		return ch.HandleRegisterSender(pkt)
-	}
-
-	if(pkt.IsRegisterReceiver()){
+	}else if(pkt.IsRegisterReceiver()){
 		ch.ClientID = pkt.GetClientID()
 		return ch.HandleRegisterReceiver(pkt)
 	}
 
 	return errors.New("Expecting a REGISTER_CONSUMER or REGISTER_PRODUCER packet.")
+}
+
+func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
+	println("@@@ ConnectionHandler handle[REGISTER_RECEIVER]")
+	log.Print("Producer registered ", ch.ID)
+	ch.Type = RECEIVER
+
+	//Creating ACK response
+	pkt = Packet{}
+	params := []string{ch.ClientID}
+	pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, Message{})
+	err := ch.Send(pkt)
+
+	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
+
+	return err
 }
 
 func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
@@ -224,20 +196,57 @@ func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 	return err
 }
 
-func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
-	println("@@@ ConnectionHandler handle[REGISTER_RECEIVER]")
-	log.Print("Producer registered ", ch.ID)
-	ch.Type = RECEIVER
+func (ch *ConnectionHandler) Send(pkt Packet) error{
+	println("@@@ ConnectionHandler [SEND]")
 
-	//Creating ACK response
-	pkt = Packet{}
-	params := []string{ch.ClientID}
-	pkt.CreatePacket(REGISTER_RECEIVER_ACK, 0, params, Message{})
-	err := ch.Send(pkt)
+	defer ch.Unlock()
+	ch.Lock()
+	encoded, err := json.Marshal(pkt)
+	encoded_size, err := json.Marshal(len(encoded))
+	ch.Connection.Write(encoded_size)
+	ch.Connection.Write(encoded)
 
-	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
-
+	if (err != nil){
+		log.Print("Encoding error sending packet", err)
+	}
 	return err
+}
+
+func (ch *ConnectionHandler) Receive() (Packet, error){
+	println("@@@ ConnectionHandler [RECEIVE]")
+
+	var pkt Packet
+	var masPktSize int64
+
+	defer ch.Unlock()
+	ch.Lock()
+	size := make([]byte, 3)
+	_, err := io.ReadFull(ch.Connection,size)
+
+	if(err != nil){
+		log.Print(err)
+	}
+
+	err = json.Unmarshal(size, &masPktSize)
+	
+	if(err != nil){
+		log.Print(err)
+	}
+
+	packetMsh := make([]byte, masPktSize)
+	_, err = io.ReadFull(ch.Connection,packetMsh)
+
+	if(err != nil){
+		log.Print(err)
+	}
+
+	err = json.Unmarshal(packetMsh, &pkt)
+
+	if(err != nil){
+		log.Print(err)
+	}
+
+	return pkt, err
 }
 
 func (ch *ConnectionHandler) GetWaitingAck() WaitingACKSafe{

@@ -26,8 +26,6 @@ func (server *Server) CreateServer(port string) {
   tmanager := TopicManager{}
   tmanager.CreateTopicManager()
   server.MyTopicManager = tmanager
-  //adminmanager := AdminManager{}
-  //server.MyAdminManager = adminmanager
   server.NextHandlerId = 0
   ln, _ := net.Listen("tcp", port)
 
@@ -89,5 +87,4 @@ func (server *Server) HandleMessage(pkt Packet){
 	pkt_.CreatePacket(ACK, 0, params, Message{})
 
   server.Receivers[pkt.GetClientID()].ToSend <- pkt_
-
 }

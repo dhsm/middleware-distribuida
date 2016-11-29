@@ -36,12 +36,12 @@ func (was *WaitingACKSafe) Len() int{
 	return len(was.Map)
 }
 
-func (was *WaitingACKSafe) Peek() (string, MessageWaitingAck, bool){
+func (was *WaitingACKSafe) Peek() (MessageWaitingAck, bool){
 	defer was.Unlock()
 	was.Lock()
 	for k, e := range was.Map {
-		return k, e, true
+		return e, true
 	}
 
-	return "", MessageWaitingAck{}, false
+	return MessageWaitingAck{}, false
 }

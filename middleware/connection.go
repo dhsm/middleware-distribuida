@@ -281,7 +281,7 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 
 func (cnn *Connection) ProcessACKS(){
 	println("+++ Conection process[ACKS]")
-	go func () {
+	go func() {
 		for{
 			println("ProcessACKS")
 			err := cnn.IsOpen()

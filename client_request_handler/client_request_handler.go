@@ -194,7 +194,7 @@ func (crh ClientRequestHandler) Send(pkt Packet) error{
 	return nil
 }
 
-func (crh ClientRequestHandler) Receive () (Packet, error){
+func (crh ClientRequestHandler) Receive() (Packet, error){
 	crh.R.Lock()
 
 	// conn, err := crh.Listen.Accept()
@@ -333,7 +333,7 @@ func (crh ClientRequestHandler) Close() error{
 }
 
 func (crh ClientRequestHandler) SendAsync(pkt Packet){
-	go func (){
+	go func(){
 		crh.S.Lock()
 		encoded, err := json.Marshal(pkt)
 		encoded_size, err := json.Marshal(len(encoded))
@@ -348,7 +348,7 @@ func (crh ClientRequestHandler) SendAsync(pkt Packet){
 }
 
 func (crh ClientRequestHandler) ListenIncomingPackets(){
-	go func () {
+	go func() {
 		for !crh.Closed{
 			pkt, err := crh.Receive()
 
