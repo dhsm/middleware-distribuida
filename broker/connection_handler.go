@@ -122,6 +122,20 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
+func (ch ConnectionHandler) SendMessages () error{
+	pkt := <-ch.ToSend
+	err := ch.Send(pkt)
+
+	if(pkt.IsMessage()){
+		log.Print("Sending message ", pkt.GetMessage().MessageID," to client " , pkt.GetClientID())
+		msg := pkt.GetMessage()
+		wack := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+		wack.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
+		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , wack.Len(), "]")
+	}
+	return err
+}
+
 
 func (ch *ConnectionHandler) Send(pkt Packet) error{
 
@@ -210,23 +224,6 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 
 	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
 
-	return err
-}
-
-func (ch ConnectionHandler) SendMessages () error{
-	pkt := <-ch.ToSend
-	err := ch.Send(pkt)
-
-	if(pkt.IsMessage()){
-		log.Print("Sending message ", pkt.GetMessage()," to client " , ch.ClientID)
-		msg := pkt.GetMessage()
-		//ch.Server.Receivers[ch.ClientID].GetWaitingAck().Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
-		teste := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-		teste.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
-		//log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , ch.Server.Receivers[ch.ClientID].GetWaitingAck().Len(), "]")
-		teste_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , teste_2.Len(), "]")
-	}
 	return err
 }
 
