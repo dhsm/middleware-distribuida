@@ -93,6 +93,7 @@ type Connection struct{
 }
 
 func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_protocol string){
+	println("==> Conection created!")
 	cnn.Lock = sync.Mutex{}
 	cnn.MessageSent = sync.Cond{L: &sync.Mutex{}}
 	cnn.AckReceived = sync.Cond{L: &sync.Mutex{}}
@@ -136,6 +137,7 @@ func (cnn *Connection) SetClientID(clientid string) error{
 }
 
 func (cnn *Connection) Close(){
+	println("+++ Conection [CLOSE]")
 	cnn.SetModified()
 	cnn.AckReceived.L.Lock()
 	cnn.Open = false
@@ -151,6 +153,7 @@ func (cnn *Connection) Close(){
 }
 
 func (cnn Connection) CreateSession() TopicSession{
+	println("+++ Conection create[SESSION]")
 	cnn.SetModified()
 	tp := TopicSession{}
 	tp.CreateSession(cnn)
@@ -159,6 +162,7 @@ func (cnn Connection) CreateSession() TopicSession{
 }
 
 func (cnn *Connection) SendMessage(msg Message) error{
+	println("+++ Conection send[MESSAGE]")
 	err := cnn.IsOpen()
 	if(err != nil){
 		return err
@@ -181,18 +185,21 @@ func (cnn *Connection) SendMessage(msg Message) error{
 }
 
 func (cnn *Connection) SubscribeSessionToDestination(topic Topic, fu MessageListener){
+	println("+++ Conection subscribe[SESSION_TO_DESTINATION]")
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
 	cnn.Subscribed.Add(topic.GetTopicName(), fu)
 }
 
 func (cnn *Connection) UnsubscribeSessionToDestination(topic Topic, fu MessageListener) bool{
+	println("+++ Conection UNsubscribe[SESSION_TO_DESTINATION]")
 	defer cnn.Lock.Unlock()
 	cnn.Lock.Lock()
 	return cnn.Subscribed.Remove(topic.GetTopicName(), fu)
 }
 
 func (cnn *Connection) Subscribe(topic Topic, fu MessageListener) error{
+	println("+++ Conection [SUBSCRIBE]")
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -208,6 +215,7 @@ func (cnn *Connection) Subscribe(topic Topic, fu MessageListener) error{
 }
 
 func (cnn *Connection) Unsubscribe(topic Topic, fu MessageListener) error{
+	println("+++ Conection [UNSUBSCRIBE]")
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -227,6 +235,7 @@ func (cnn *Connection) Unsubscribe(topic Topic, fu MessageListener) error{
 }
 
 func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
+	println("+++ Conection [ACK_MESSAGE]")
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -242,6 +251,7 @@ func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
 }
 
 func (cnn *Connection) CloseSession(ts TopicSession){
+	println("+++ Conection [CLOSE_SESSION]")
 	for k, v := range cnn.Subscribed.Map{
 		for i, e := range v{
 			if(reflect.DeepEqual(e,ts)){
@@ -255,6 +265,7 @@ func (cnn *Connection) CloseSession(ts TopicSession){
 }
 
 func (cnn *Connection) CreateTopic(tp Topic) error{
+	println("+++ Conection create[TOPIC]")
 	err := cnn.IsOpen()
 	if(err != nil){
 		log.Print(err)
@@ -269,6 +280,7 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 }
 
 func (cnn *Connection) ProcessACKS(){
+	println("+++ Conection process[ACKS]")
 	go func () {
 		for{
 			println("ProcessACKS")
@@ -321,6 +333,7 @@ func (cnn *Connection) ProcessACKS(){
 }
 
 func (cnn Connection) OnPacket(pkt Packet){
+	println("+++ Conection [ON_PACKET]")
 	if(!cnn.Stopped){
 		if(pkt.IsMessage()){
 			msg := pkt.Msg
@@ -346,6 +359,7 @@ func (cnn Connection) OnPacket(pkt Packet){
 }
 
 func (cnn Connection) Start(){
+	println("+++ Conection [START]")
 	if(!cnn.Open){
 		tries := 0
 		for tries <= 5 {
@@ -374,5 +388,6 @@ func (cnn Connection) Start(){
 }
 
 func (cnn *Connection) Stop(){
+	println("+++ Conection [STOP]")
 	cnn.Stopped = true
 }
