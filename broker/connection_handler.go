@@ -38,7 +38,8 @@ func (ht HandleType) Values() *[]string {
 }
 
 type ConnectionHandler struct{
-	sync.Mutex
+	Lock sync.Mutex
+	ACK sync.Mutex
 	ID int
 	Server Server
 	Connection net.Conn
@@ -128,6 +129,8 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 }
 
 func (ch ConnectionHandler) SendMessages() error{
+	defer ch.ACK.Unlock()
+	ch.ACK.Lock()
 	println("@@@ ConnectionHandler send[MESSAGES]")
 	pkt := <-ch.ToSend
 	err := ch.Send(pkt)
@@ -176,6 +179,10 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 
 	ch.Server.HandleRegisterReceiver(pkt, ch.ID)
 
+	mm := MessageManager{}
+	mm.NewMM(ch.Server, ch.ClientID, &ch.ACK)
+	go mm.Execute()
+
 	return err
 }
 
@@ -199,8 +206,8 @@ func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 func (ch *ConnectionHandler) Send(pkt Packet) error{
 	println("@@@ ConnectionHandler [SEND]")
 
-	defer ch.Unlock()
-	ch.Lock()
+	defer ch.Lock.Unlock()
+	ch.Lock.Lock()
 	encoded, err := json.Marshal(pkt)
 	encoded_size, err := json.Marshal(len(encoded))
 	ch.Connection.Write(encoded_size)
@@ -218,8 +225,8 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	var pkt Packet
 	var masPktSize int64
 
-	defer ch.Unlock()
-	ch.Lock()
+	defer ch.Lock.Unlock()
+	ch.Lock.Lock()
 	size := make([]byte, 3)
 	_, err := io.ReadFull(ch.Connection,size)
 
