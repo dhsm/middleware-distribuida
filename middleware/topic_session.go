@@ -14,11 +14,13 @@ type TopicSession struct {
 }
 
 func (tsession *TopicSession) CreateSession(conn Connection) {
+  println("==> TopicSession created!")
   tsession.SubscribedList = make(map[string][]TopicSubscriber)
   tsession.MyConnectionSendMessage = conn
 }
 
 func (tsession *TopicSession) CreateTopicPublisher(tpc Topic) TopicPublisher {
+  println("### TopicSession create[PUBLISHER]")
   return tsession.createPublisherInternal(tpc).(TopicPublisher)
 }
 
@@ -30,6 +32,7 @@ func (tsession *TopicSession) createPublisherInternal(tpc Topic) interface{} {
 }
 
 func (tsession *TopicSession) CreateTopicSubscriber(tpc Topic) TopicSubscriber {
+  println("### TopicSession create[SUBSCRIBER]")
   return tsession.createSubscriberInternal(tpc).(TopicSubscriber)
 }
 
@@ -58,6 +61,7 @@ func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
 }
 
 func (tsession *TopicSession) CreateTopic(topicname string) Topic{
+  println("### TopicSession create[TOPIC]")
   topic := Topic{}
   topic.CreateTopic(topicname)
   //TODO call createtopic
@@ -67,12 +71,14 @@ func (tsession *TopicSession) CreateTopic(topicname string) Topic{
 
 //TODO check if here we really need to create an empty message
 func (tsession *TopicSession) CreateMessage(msgtext string, destination string, priority int, messageid string) Message{
+  println("### TopicSession create[MESSAGE]")
   msg := Message{}
   msg.CreateMessage(msgtext, destination, priority, messageid)
   return msg
 }
 
 func (tsession *TopicSession) OnMessageReceived(msg Message) {
+  println("### TopicSession [ON_MESSAGE_RECEIVED]")
   //TODO check if msg really is the object that has SessionAck
   // msg.SetSessionAck(tsession)
   // topic := msg.GetTopic()
@@ -86,11 +92,13 @@ func (tsession *TopicSession) OnMessageReceived(msg Message) {
 }
 
 func (tsession *TopicSession) Send(msg Message) {
+  println("### TopicSession [SEND]")
   //TODO call send
   tsession.MyConnectionSendMessage.SendMessage(msg)
 }
 
 func (tsession *TopicSession) CloseSubscriber(publisher TopicSubscriber){
+  println("### TopicSession [CLOSE_SUBSCRIBER]")
   topic := publisher.GetTopic()
   var mu sync.Mutex
   mu.Lock()
@@ -108,6 +116,7 @@ func (tsession *TopicSession) CloseSubscriber(publisher TopicSubscriber){
 }
 
 func (tsession *TopicSession) Unsubscribe(topic_name string) {
+  println("### TopicSession create[UNSUBSCRIBE]")
   //TODO call unsubscribe
   //tsession.MyConnectionSendMessage.Unsubscribe(topic_name)
 }
