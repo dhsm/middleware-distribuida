@@ -50,6 +50,8 @@ type ConnectionHandler struct{
 }
 
 func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
+	println("==> Connection created!")
+
 	ch.ID = id
 	ch.Connection = conn
 	ch.Server = server
@@ -58,10 +60,12 @@ func (ch *ConnectionHandler) NewCH(id int, conn net.Conn, server Server){
 	ch.ToSend = make(chan Packet, 50)
 	ch.WaitingACK = WaitingACKSafe{}
 	ch.WaitingACK.Init()
-	
+
 }
 
 func (ch *ConnectionHandler) Execute () {
+	println("@@@ ConnectionHandler [EXECUTE]")
+
 	err := ch.HandleRegister()
 	if(err != nil){
 		ch.Running = false
@@ -84,7 +88,7 @@ func (ch *ConnectionHandler) Execute () {
 }
 
 func (ch *ConnectionHandler) HandleReceivedMessages () error{
-	println("*** ConnectionHandler HandleReceivedMessages")
+	println("@@@ ConnectionHandler handle[RECEIVED_MESSAGES]")
 
 	pkt, err := ch.Receive()
 
@@ -111,7 +115,8 @@ func (ch *ConnectionHandler) HandleReceivedMessages () error{
 }
 
 func (ch *ConnectionHandler) handleACK (pkt Packet){
-	println("*** ConnectionHandler handleACK")
+	println("@@@ ConnectionHandler handle[ACK]")
+
 
 	log.Print("Received ack for message ", pkt.GetMessage().MessageID, " from client ", pkt.GetClientID())
 	temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
@@ -124,6 +129,7 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 
 
 func (ch *ConnectionHandler) Send(pkt Packet) error{
+	println("@@@ ConnectionHandler [SEND]")
 
 	defer ch.Unlock()
 	ch.Lock()
@@ -139,6 +145,8 @@ func (ch *ConnectionHandler) Send(pkt Packet) error{
 }
 
 func (ch *ConnectionHandler) Receive () (Packet, error){
+	println("@@@ ConnectionHandler [RECEIVE]")
+
 	var pkt Packet
 	var masPktSize int64
 
@@ -161,8 +169,9 @@ func (ch *ConnectionHandler) Receive () (Packet, error){
 }
 
 func (ch *ConnectionHandler) HandleRegister () error {
-	println("*** ConnectionHandler HandleRegister")
-	
+	println("@@@ ConnectionHandler handle[REGISTER]")
+
+
 	pkt, err := ch.Receive()
 
 	if(err != nil){
@@ -184,6 +193,8 @@ func (ch *ConnectionHandler) HandleRegister () error {
 }
 
 func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
+	println("@@@ ConnectionHandler handle[REGISTER_SENDER]")
+
 	log.Print("Sender registered ", ch.ID)
 	ch.Type = SENDER
 
@@ -199,6 +210,7 @@ func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 }
 
 func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
+	println("@@@ ConnectionHandler handle[REGISTER_RECEIVER]")
 	log.Print("Producer registered ", ch.ID)
 	ch.Type = RECEIVER
 
@@ -214,6 +226,8 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 }
 
 func (ch ConnectionHandler) SendMessages () error{
+	println("@@@ ConnectionHandler send[MESSAGES]")
+
 	pkt := <-ch.ToSend
 	err := ch.Send(pkt)
 
