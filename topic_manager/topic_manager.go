@@ -11,15 +11,18 @@ type TopicManager struct {
 }
 
 func (tpcManager *TopicManager) CreateTopicManager(){
+  println("==> TopicManager created!")
   tpcManager.ActiveTopics = make([]string,0)
 }
 
 func (tpcManager *TopicManager) CreateTopic(topic_name string){
+  println("!!! TopicManager create[TOPIC]")
   node := Node{}
   node.CreateNode(topic_name)
 }
 
 func (tpcManager *TopicManager) AddMessageToTopic(topicname string, msg Message){
+  println("!!! TopicManager add[MESSAGE_TO_TOPIC]")
   var addWindowMutex sync.Mutex
   addWindowMutex.Lock()
   tpcManager.ActiveTopics = append(tpcManager.ActiveTopics, topicname)
@@ -32,6 +35,7 @@ func (tpcManager *TopicManager) AddMessageToTopic(topicname string, msg Message)
 }
 
 func (tpcManager *TopicManager) PopMessage() Message{
+  println("!!! TopicManager pop[MESSAGE]")
   return tpcManager.popMessage().(Message)
 }
 
@@ -45,12 +49,14 @@ func (tpcManager *TopicManager) popMessage() interface{} {
 }
 
 func (tpcManager *TopicManager) Subscribe(topic_name string, clientId string){
+  println("!!! TopicManager [SUBSCRIBE]")
   subscribers := tpcManager.Root.GetSubscribed()
   subscribers[topic_name] = 1
   tpcManager.Root.SetSubscribed(subscribers)
 }
 
 func (tpcManager *TopicManager) Unsubscribe(topicname string, clientId string){
+  println("!!! TopicManager [UNSUBSCRIBE]")
   subscribers := tpcManager.Root.GetSubscribed()
   client := subscribers[clientId]
   if client == 0 {
@@ -62,6 +68,7 @@ func (tpcManager *TopicManager) Unsubscribe(topicname string, clientId string){
 }
 
 func (tpcManager *TopicManager) PopActiveTopic() string {
+  println("!!! TopicManager pop[ACTIVE_TOPIC]")
   var addWindowMutex sync.Mutex
   addWindowMutex.Lock()
   defer addWindowMutex.Unlock()
