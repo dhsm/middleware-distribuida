@@ -219,6 +219,10 @@ func (ch *ConnectionHandler) Send(pkt Packet) error{
 	
 	encoded, err := json.Marshal(pkt)
 
+	// println("√√√√√√√√√√√√")
+	// println(len(encoded))
+	// println("√√√√√√√√√√√√")
+
 	if (err != nil){
 		log.Print("Encoding error sending packet", err)
 		return err
@@ -241,9 +245,9 @@ func (ch *ConnectionHandler) Send(pkt Packet) error{
 		return err
 	}
 
-	println("##########")
-	fmt.Println(pkt)
-	println("##########")
+	// println("##########")
+	// fmt.Println(pkt)
+	// println("##########")
 
 	return nil
 }
@@ -263,11 +267,14 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")
 	read_len, err := ch.Connection.Read(temp)
 
+	if(read_len != 8){
+		panic("Deu merda!")
+	}
+
 	if(err != nil){
 		log.Print(err)
 	}
 	println("@@@ ConnectionHandler [RECEIVE] *ReadFull, now will Unmarshall*")
-	fmt.Println(temp)
 	err = json.Unmarshal(temp[:read_len], &masPktSize)
 
 	if(err!=nil){
@@ -275,6 +282,10 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	}
 
 	fmt.Sscanf(masPktSize, "%d", &size)
+
+	// println("√√√√√√√√√√√√")
+	// println(size)
+	// println("√√√√√√√√√√√√")
 
 	packetMsh := make([]byte, size)
 	println("@@@ ConnectionHandler [RECEIVE] *read size packet*")
@@ -289,10 +300,10 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	if(err!=nil){
 		log.Print(err)
 	}
-	println("@@@ ConnectionHandler [RECEIVE] *we will return now*")
-	println("##########")
-	fmt.Println(pkt)
-	println("##########")
+	// println("@@@ ConnectionHandler [RECEIVE] *we will return now*")
+	// println("##########")
+	// fmt.Println(pkt)
+	// println("##########")
 	return pkt, err
 }
 

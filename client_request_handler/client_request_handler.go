@@ -109,6 +109,10 @@ func (crh *ClientRequestHandler) Send(pkt Packet) error{
 		return err
 	}
 
+	// println("√√√√√√√√√√√√")
+	// println(len(encoded))
+	// println("√√√√√√√√√√√√")
+
 	pkt_len := fmt.Sprintf("%06d",len(encoded))
 
 	println(pkt_len)
@@ -123,10 +127,10 @@ func (crh *ClientRequestHandler) Send(pkt Packet) error{
 	crh.Connection.Write(encoded_size)
 	crh.Connection.Write(encoded)
 
-	println("Packet sent sucessfully!")
-	println("##########")
-	fmt.Println(pkt)
-	println("##########")
+	// println("Packet sent sucessfully!")
+	// println("##########")
+	// fmt.Println(pkt)
+	// println("##########")
 
 	return nil
 }
@@ -156,7 +160,9 @@ func (crh *ClientRequestHandler) Receive() (Packet, error){
 
 	fmt.Sscanf(masPktSize, "%d", &size)
 
-	println(size)
+	// println("√√√√√√√√√√√√")
+	// println(size)
+	// println("√√√√√√√√√√√√")
 
 	packetMsh := make([]byte, size)
 
@@ -172,10 +178,10 @@ func (crh *ClientRequestHandler) Receive() (Packet, error){
 		log.Fatal(err)
 	}
 
-	println("Packet received sucessfully!")
-	println("##########")
-	fmt.Println(pkt)
-	println("##########")
+	// println("Packet received sucessfully!")
+	// println("##########")
+	// fmt.Println(pkt)
+	// println("##########")
 
 	return pkt, err
 }
@@ -267,16 +273,37 @@ func (crh *ClientRequestHandler) Close() error{
 
 func (crh *ClientRequestHandler) SendAsync(pkt Packet){
 	go func(){
+		println("ΩΩΩ ClientRequestHandler sendAsync[PACKET]")
 		crh.S.Lock()
+
 		encoded, err := json.Marshal(pkt)
-		encoded_size, err := json.Marshal(len(encoded))
-		crh.Connection.Write(encoded_size)
-		crh.Connection.Write(encoded)
-		crh.S.Unlock()
 
 		if (err != nil){
-			log.Fatal("Encoding error sending packet", err)
+			log.Fatal(err)
 		}
+
+		// println("√√√√√√√√√√√√")
+		// println(len(encoded))
+		// println("√√√√√√√√√√√√")
+
+		pkt_len := fmt.Sprintf("%06d",len(encoded))
+
+		println(pkt_len)
+
+		encoded_size, err := json.Marshal(pkt_len)
+
+		if (err != nil){
+			log.Fatal(err)
+		}
+
+		crh.Connection.Write(encoded_size)
+		crh.Connection.Write(encoded)
+
+		// println("Packet sent sucessfully!")
+		// println("##########")
+		// fmt.Println(pkt)
+		// println("##########")
+		crh.S.Unlock()
 	}()
 }
 

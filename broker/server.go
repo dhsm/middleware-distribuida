@@ -97,6 +97,6 @@ func (server *Server) HandleMessage(pkt Packet){
     fmt.Println("Key:", key)
     current_receiver = key
   }
-  //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
-  server.Receivers[current_receiver].ToSend <- pkt_
+  server.Receivers[pkt.GetClientID()].ToSend <- pkt_
+  // server.Receivers[current_receiver].ToSend <- pkt_
 }
