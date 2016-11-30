@@ -137,7 +137,7 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
-func (ch ConnectionHandler) SendMessages() error{
+func (ch *ConnectionHandler) SendMessages() error{
 	defer ch.ACK.Unlock()
 	ch.ACK.Lock()
 	println("@@@ ConnectionHandler send[MESSAGES]")

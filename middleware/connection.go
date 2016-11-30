@@ -95,8 +95,8 @@ type Connection struct{
 func (cnn *Connection) CreateConnection(host_ip string, host_port string, host_protocol string){
 	println("==> Conection created!")
 	cnn.Lock = sync.Mutex{}
-	cnn.MessageSent = sync.Cond{L: &sync.Mutex{}}
-	cnn.AckReceived = sync.Cond{L: &sync.Mutex{}}
+	cnn.MessageSent = sync.Cond{L: &cnn.Lock}
+	cnn.AckReceived = sync.Cond{L: &cnn.Lock}
 
 	cnn.HostIp = host_ip
 	cnn.HostPort = host_port
@@ -172,7 +172,7 @@ func (cnn *Connection) SendMessage(msg Message) error{
 		return err
 	}
 	//println("+++ Conection add WaitingACK")
-	cnn.WaitingACK.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
+	cnn.WaitingACK.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix() + (5 * 1000)), msg.MessageID})
 
 	cnn.MessageSent.L.Lock()
 	//Broadcasting that there is new messages waiting for an ACK
@@ -298,6 +298,7 @@ func (cnn *Connection) ProcessACKS(){
 			}
 
 			if (cnn.WaitingACK.Len() == 0){
+				println("Sem ACKS")
 				cnn.MessageSent.L.Lock()
 
 				//println("ProcessACKS")
@@ -309,6 +310,8 @@ func (cnn *Connection) ProcessACKS(){
 
 				cnn.MessageSent.Wait() //Waiting for messages to be sent before stat to process ACKS again
 				cnn.MessageSent.L.Unlock()
+			}else{
+				println(cnn.WaitingACK.Len())
 			}
 
 			//println("ProcessACKS")
@@ -323,13 +326,14 @@ func (cnn *Connection) ProcessACKS(){
 				curr := int32(time.Now().Unix())
 				if(maa.TimeStamp <= curr){
 					cnn.WaitingACK.Remove(key)
+					println("RESENDING MESSAGE TIMEDOUT!")
 					cnn.SendMessage(maa.Message)
 				}else{
 					time.Sleep(time.Microsecond * time.Duration(curr))
 				}
 			}
 
-			//println("ProcessACKS")
+			
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -364,7 +368,9 @@ func (cnn *Connection) OnPacket(pkt Packet){
 				fmt.Println(errors.New("Params (an slice) of packet has no ACK index"))
 				//panic(fmt.Sprintf("halp"))
 			}else{
-				key := pkt.Params[0]
+				key := pkt.Params[1]
+				// println("A porra da KEY tinha de ser m1 ", key)
+				// time.Sleep(time.Second * 10)
 				cnn.Lock.Lock()
 				cnn.WaitingACK.Remove(key)
 				cnn.AckReceived.Broadcast()

@@ -1,6 +1,7 @@
 package message
 
 import "sync"
+// import "fmt"
 
 type WaitingACKSafe struct{
 	sync.Mutex
@@ -28,6 +29,7 @@ func (was *WaitingACKSafe) Remove(key string){
 	defer was.Unlock()
 	was.Lock()
 	delete(was.Map,key)
+	// fmt.Println(was.Map)
 }
 
 func (was *WaitingACKSafe) Len() int{

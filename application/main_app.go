@@ -25,6 +25,7 @@ func main() {
   subscriber1.GetTopic()
 
   publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
+  publisher.Send(session.CreateMessage("Menina quando...", "arborismo",1,"m2"))
   //publisher2.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
 
 
