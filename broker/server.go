@@ -92,11 +92,12 @@ func (server *Server) HandleMessage(pkt Packet){
 
   //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
   fmt.Println("*** Server receivers ::: ",server.Receivers)
-  current_receiver := ""
+  // current_receiver := ""
   for key, _ := range server.Receivers {
     fmt.Println("Key:", key)
-    current_receiver = key
+    // current_receiver = key
   }
-  server.Receivers[pkt.GetClientID()].ToSend <- pkt_
+  handler := server.Receivers[pkt.GetClientID()]
+  handler.ToSend <- pkt_
   // server.Receivers[current_receiver].ToSend <- pkt_
 }
