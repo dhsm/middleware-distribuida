@@ -10,7 +10,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	x,y := int32(pq[i].Msg.Priority),int32(pq[j].Msg.Priority)
+	x,y := int32(pq[i].Priority),int32(pq[j].Priority)
 	x_t, y_t := pq[i].TimeStamp,pq[j].TimeStamp
 
 	if(x -1 == 0){
@@ -46,7 +46,7 @@ func (pq *PriorityQueue) Pop() interface{}{
 }
 
 func (pq *PriorityQueue) update(pkt *Packet, msgtext string, priority int){
-	pkt.Msg.MsgText = msgtext
-	pkt.Msg.Priority = priority
+	pkt.MsgText = msgtext
+	pkt.Priority = priority
 	heap.Fix(pq, pkt.Index)
 }

@@ -183,7 +183,7 @@ func (cnn *Connection) SendMessage(msg Message) error{
 
 	pkt := Packet{}
 	params := []string{msg.GetDestination()}
-	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, params, msg)
+	pkt.CreatePacket(MESSAGE.Ordinal(), cnn.PacketIDGenerator, params, msg)
 	//pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
 	cnn.PacketIDGenerator++
 	//println("+++ Conection SendAsync packet")
@@ -216,7 +216,7 @@ func (cnn *Connection) Subscribe(topic Topic, fu MessageListener) error{
 	cnn.SubscribeSessionToDestination(topic, fu)
 	pkt := Packet{}
 	params := []string{cnn.ClientID, topic.GetTopicName()}
-	pkt.CreatePacket(SUBSCRIBE, cnn.PacketIDGenerator, params, Message{})
+	pkt.CreatePacket(SUBSCRIBE.Ordinal(), cnn.PacketIDGenerator, params, Message{})
 	cnn.PacketIDGenerator++
 	return cnn.SenderConnection.Send(pkt)
 }
@@ -233,7 +233,7 @@ func (cnn *Connection) Unsubscribe(topic Topic, fu MessageListener) error{
 	if (result){
 		pkt := Packet{}
 		params := []string{cnn.ClientID, topic.GetTopicName()}
-		pkt.CreatePacket(UNSUBSCRIBE, cnn.PacketIDGenerator, params, Message{})
+		pkt.CreatePacket(UNSUBSCRIBE.Ordinal(), cnn.PacketIDGenerator, params, Message{})
 		cnn.PacketIDGenerator++
 		return cnn.SenderConnection.Send(pkt)
 	}
@@ -251,7 +251,7 @@ func (cnn *Connection) AcknowledgeMessage(msg Message, ts TopicSession) error{
 	cnn.SetModified()
 	pkt := Packet{}
 	params := []string{cnn.ClientID, msg.MessageID}
-	pkt.CreatePacket(ACK, cnn.PacketIDGenerator, params, Message{})
+	pkt.CreatePacket(ACK.Ordinal(), cnn.PacketIDGenerator, params, Message{})
 	cnn.PacketIDGenerator++
 	cnn.SenderConnection.SendAsync(pkt)
 	return nil
@@ -280,7 +280,7 @@ func (cnn *Connection) CreateTopic(tp Topic) error{
 	}
 	pkt := Packet{}
 	params := []string{cnn.ClientID, tp.GetTopicName()}
-	pkt.CreatePacket(CREATE_TOPIC, cnn.PacketIDGenerator, params, Message{})
+	pkt.CreatePacket(CREATE_TOPIC.Ordinal(), cnn.PacketIDGenerator, params, Message{})
 	cnn.PacketIDGenerator++
 	cnn.SenderConnection.SendAsync(pkt)
 	return nil
@@ -343,7 +343,7 @@ func (cnn *Connection) OnPacket(pkt Packet){
 	println("+++ Conection [ON_PACKET]")
 	if(!cnn.Stopped){
 		if(pkt.IsMessage()){
-			msg := pkt.Msg
+			msg := pkt.GetMessage()
 			destination := msg.Destination
 			cnn.Lock.Lock()
 			sessions, found := cnn.Subscribed.Get(destination)

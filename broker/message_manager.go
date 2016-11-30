@@ -33,7 +33,7 @@ func (mm *MessageManager) Execute(){
 			channel := temp.ToSend
 			pkt_ := Packet{}
 			params := []string{mm.ClientID}
-			pkt_.CreatePacket(MESSAGE, 0, params, msg.Message)
+			pkt_.CreatePacket(MESSAGE.Ordinal(), 0, params, msg.Message)
 
 			channel <- pkt_
 		}else{

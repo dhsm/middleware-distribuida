@@ -4,6 +4,7 @@ import . "./message"
 import . "./packet"
 import . "./client_request_handler"
 
+// import "time"
 import "strconv"
 
 func main(){
@@ -17,6 +18,7 @@ func main(){
       panic(err)
     }
 
+    print(pktRCV.GetMessage().MsgText)
     ret, err := strconv.Atoi(pktRCV.GetMessage().MsgText)
 
     if(err != nil){
@@ -30,8 +32,9 @@ func main(){
 
     pkt := Packet{}
     params := []string{}
-    pkt.CreatePacket(ACK, ret-1, params, msg)
+    pkt.CreatePacket(ACK.Ordinal(), ret-1, params, msg)
 
     srh.Send(pkt)
+    // time.Sleep(time.Second*5)
   }
 }

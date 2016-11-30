@@ -1,10 +1,11 @@
 package packet
 
 import "time"
+import "fmt"
 
 import . "../message"
 
-type Operation uint
+type Operation int
 
 const (
 	REGISTER_SENDER Operation = iota
@@ -31,8 +32,8 @@ var operations = []string{
 func (op Operation) Name() string {
 	return operations[op]
 }
-func (op Operation) Ordinal() uint {
-	return uint(op)
+func (op Operation) Ordinal() int {
+	return int(op)
 }
 func (op Operation) String() string {
 	return operations[op]
@@ -43,28 +44,44 @@ func (op Operation) Values() *[]string {
 }
 
 type Packet struct{
-	Operation Operation
+	Operation int
 	ID int
 	Params []string
-	Msg Message
 	TimeStamp int32
 	Index int //This is necessary because we are using a PriorityQueue
+
+	//Message content
+	MsgText string
+	Priority int
+	Destination string
+	MessageID string
+	Redelivery bool
 }
 
-func (pkt *Packet) CreatePacket(op Operation, id int, params []string, msg Message){
+func (pkt Packet) String() string {
+	return fmt.Sprintf("Operation: %d\nID: %d\nParams: %p\nTimeStamp: %d\nIndex: %d\nMsgText: %s\nPriority: %d\nDestination: %s\nMessageID: %s\nRedelivery: %t\n", pkt.Operation, pkt.ID, pkt.Params, pkt.TimeStamp, pkt.Index, pkt.MsgText, pkt.Priority, pkt.Destination, pkt.MessageID, pkt.Redelivery)
+}
+
+func (pkt *Packet) CreatePacket(op int, id int, params []string, msg Message){
 	pkt.Operation = op
 	pkt.ID = id
 	pkt.Params = params
-	pkt.Msg = msg
 	pkt.Index = -1
 	pkt.TimeStamp = int32(time.Now().Unix())
+
+	//Incorporating message into packet
+	pkt.MsgText = msg.MsgText
+	pkt.Priority = msg.Priority
+	pkt.Destination = msg.Destination
+	pkt.MessageID = msg.MessageID
+	pkt.Redelivery = msg.Redelivery
 }
 
-func (pkt *Packet) GetOperation() Operation{
+func (pkt *Packet) GetOperation() int{
 	return pkt.Operation
 }
 
-func (pkt *Packet) SetOperation(operation Operation){
+func (pkt *Packet) SetOperation(operation int){
 	pkt.Operation = operation
 }
 
@@ -80,16 +97,20 @@ func (pkt *Packet) SetID(id int){
 	pkt.ID = id
 }
 
-func (pkt *Packet) GetType() Operation{
+func (pkt *Packet) GetType() int{
 	return pkt.Operation
 }
 
 func (pkt *Packet) GetMessage() Message{
-	return pkt.Msg
+	return Message{pkt.MsgText, pkt.Priority, pkt.Destination, pkt.MessageID, pkt.Redelivery}
 }
 
 func (pkt *Packet) SetMessage(msg Message){
-	pkt.Msg = msg
+	pkt.MsgText = msg.MsgText
+	pkt.Priority = msg.Priority
+	pkt.Destination = msg.Destination
+	pkt.MessageID = msg.MessageID
+	pkt.Redelivery = msg.Redelivery
 }
 
 func (pkt *Packet) GetParams() []string{
@@ -101,29 +122,29 @@ func (pkt *Packet) SetParams(params []string){
 }
 
 func (pkt *Packet) IsRegisterSender() bool{
-	return pkt.Operation == REGISTER_SENDER
+	return pkt.Operation == REGISTER_SENDER.Ordinal()
 }
 func (pkt *Packet) IsRegisterReceiver() bool{
-	return pkt.Operation == REGISTER_RECEIVER
+	return pkt.Operation == REGISTER_RECEIVER.Ordinal()
 }
 func (pkt *Packet) IsRegisterSenderAck() bool{
-	return pkt.Operation == REGISTER_SENDER_ACK
+	return pkt.Operation == REGISTER_SENDER_ACK.Ordinal()
 }
 func (pkt *Packet) IsRegisterReceiverAck() bool{
-	return pkt.Operation == REGISTER_RECEIVER_ACK
+	return pkt.Operation == REGISTER_RECEIVER_ACK.Ordinal()
 }
 func (pkt *Packet) IsSubscribe() bool{
-	return pkt.Operation == SUBSCRIBE
+	return pkt.Operation == SUBSCRIBE.Ordinal()
 }
 func (pkt *Packet) IsUnsubscribe() bool{
-	return pkt.Operation == UNSUBSCRIBE
+	return pkt.Operation == UNSUBSCRIBE.Ordinal()
 }
 func (pkt *Packet) IsCreateTopic() bool{
-	return pkt.Operation == CREATE_TOPIC
+	return pkt.Operation == CREATE_TOPIC.Ordinal()
 }
 func (pkt *Packet) IsMessage() bool{
-	return pkt.Operation == MESSAGE
+	return pkt.Operation == MESSAGE.Ordinal()
 }
 func (pkt *Packet) IsACK() bool{
-	return pkt.Operation == ACK
+	return pkt.Operation == ACK.Ordinal()
 }

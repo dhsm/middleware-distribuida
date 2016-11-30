@@ -20,12 +20,20 @@ func main(){
   i := 0 
 
   for{
+    fmt.Println("sending packet",i)
     msg := Message{}
     msg.CreateMessage(strconv.Itoa(i), "replay", i, "client01")
 
     pkt := Packet{}
-    params := []string{"arg0", "arg1", "arg2"}
-    pkt.CreatePacket(MESSAGE, 0, params, msg)
+    if( i%2 == 1){
+      // params := []string{}
+      params := []string{"arg0", "arg1"}
+      pkt.CreatePacket(ACK.Ordinal(), 0, params, msg)
+    }else{
+      params := []string{"arg0", "arg1", "arg2"}
+      pkt.CreatePacket(MESSAGE.Ordinal(), 0, params, msg)  
+    }
+    
 
     crh.Send(pkt)
     response, err := crh.Receive()
@@ -34,7 +42,7 @@ func main(){
       panic(err)
     }
 
-    fmt.Println(response.GetMessage().MsgText)
+    // fmt.Println(response.GetMessage().MsgText)
     i, err = strconv.Atoi(response.GetMessage().MsgText)
 
     if(err != nil){

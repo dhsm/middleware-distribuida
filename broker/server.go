@@ -88,7 +88,7 @@ func (server *Server) HandleMessage(pkt Packet){
   fmt.Println("*** Server packet ::: ",pkt)
   fmt.Println("*** Server clientID ::: ",pkt.GetClientID())
 	params := []string{pkt.GetClientID()}
-	pkt_.CreatePacket(ACK, 0, params, Message{})
+	pkt_.CreatePacket(ACK.Ordinal(), 0, params, Message{})
 
   //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
   fmt.Println("*** Server receivers ::: ",server.Receivers)
