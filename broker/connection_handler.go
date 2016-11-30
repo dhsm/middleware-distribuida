@@ -234,7 +234,7 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 
 	defer ch.Lock.Unlock()
 	ch.Lock.Lock()
-	
+
 	println("@@@ ConnectionHandler [RECEIVE] *we are inside Lock()*")
 	size := make([]byte, 3)
 	println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")

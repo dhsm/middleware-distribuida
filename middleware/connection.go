@@ -6,7 +6,7 @@ import "time"
 import "log"
 import "errors"
 import "reflect"
- // import "fmt"
+import "fmt"
 
 import "github.com/nu7hatch/gouuid"
 
@@ -164,10 +164,14 @@ func (cnn Connection) CreateSession() TopicSession{
 func (cnn *Connection) SendMessage(msg Message) error{
 	println("+++ Conection send[MESSAGE]")
 	err := cnn.IsOpen()
+	println("+++ Conection WTF")
+
 	if(err != nil){
+		fmt.Println(err)
+
 		return err
 	}
-
+	println("+++ Conection add WaitingACK")
 	cnn.WaitingACK.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
 
 	cnn.MessageSent.L.Lock()
@@ -179,7 +183,10 @@ func (cnn *Connection) SendMessage(msg Message) error{
 
 	pkt := Packet{}
 	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
+	//pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
+	//pkt.CreatePacket(CREATE_TOPIC, cnn.PacketIDGenerator, nil, Message{})
 	cnn.PacketIDGenerator++
+	println("+++ Conection SendAsync packet")
 	cnn.SenderConnection.SendAsync(pkt)
 	return nil
 }
@@ -358,7 +365,7 @@ func (cnn Connection) OnPacket(pkt Packet){
 	}
 }
 
-func (cnn Connection) Start(){
+func (cnn *Connection) Start(){
 	println("+++ Conection [START]")
 	if(!cnn.Open){
 		tries := 0
@@ -378,8 +385,11 @@ func (cnn Connection) Start(){
 
 			cnn.Open = true
 			cnn.Stopped = false
+			println("+++ Conection [ReceiverConnection]SetConnection")
 			cnn.ReceiverConnection.SetConnection(cnn)
+			println("+++ Conection [SenderConnection]SetConnection")
 			cnn.SenderConnection.SetConnection(cnn)
+			println("+++ Conection [ReceiverConnection]ListenIncomingPackets")
 			cnn.ReceiverConnection.ListenIncomingPackets()
 			go cnn.ProcessACKS()
 			break

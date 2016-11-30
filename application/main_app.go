@@ -10,12 +10,13 @@ func main() {
   conn.Start()
 
   session := TopicSession{}
-  // session.CreateSession(conn)
+  session.CreateSession(conn)
 
   topic := session.CreateTopic("arborismo")
 
   publisher := session.CreateTopicPublisher(topic)
-  // subscriber1 := session.CreateTopicSubscriber(topic)
+  //publisher2 := session.CreateTopicPublisher(topic)
+  //subscriber1 := session.CreateTopicSubscriber(topic)
   // subscriber2 := session.CreateTopicSubscriber(topic)
   // subscriber3 := session.CreateTopicSubscriber(topic)
 
@@ -24,7 +25,7 @@ func main() {
   //subscriber1.SetMessageListener()
 
   publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
-  //publisher.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
+  //publisher2.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
 
 
   time.Sleep(time.Second * 3000)
