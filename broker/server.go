@@ -1,7 +1,7 @@
 package broker
 
 import "net"
-// import "fmt"
+import "fmt"
 import "log"
 import . "../packet"
 import . "../message"
@@ -59,6 +59,7 @@ func (server *Server) HandleRegisterSender(pkt Packet, id int){
 
 func (server *Server) HandleRegisterReceiver(pkt Packet, id int){
   println("*** Server handle[RECEIVER]")
+  println("*** Server receiver added : ",pkt.GetClientID())
   server.Receivers[pkt.GetClientID()] = server.Handlers[id]
 }
 
@@ -80,11 +81,22 @@ func (server *Server) HandleCreateTopic(pkt Packet){
 func (server *Server) HandleMessage(pkt Packet){
   println("*** Server handle[MESSAGE]")
   topic := pkt.GetMessage().Destination
-  server.MyTopicManager.AddMessageToTopic(topic, pkt.GetMessage())
+  //server.MyTopicManager.AddMessageToTopic(topic, pkt.GetMessage())
+  server.MyTopicManager.AddMessageToTopic(topic, pkt)
 
   pkt_ := Packet{}
+  fmt.Println("*** Server packet ::: ",pkt)
+  fmt.Println("*** Server clientID ::: ",pkt.GetClientID())
 	params := []string{pkt.GetClientID()}
 	pkt_.CreatePacket(ACK, 0, params, Message{})
 
-  server.Receivers[pkt.GetClientID()].ToSend <- pkt_
+  //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
+  fmt.Println("*** Server receivers ::: ",server.Receivers)
+  current_receiver := ""
+  for key, _ := range server.Receivers {
+    fmt.Println("Key:", key)
+    current_receiver = key
+  }
+  //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
+  server.Receivers[current_receiver].ToSend <- pkt_
 }

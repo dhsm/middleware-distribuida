@@ -16,13 +16,13 @@ func main() {
 
   publisher := session.CreateTopicPublisher(topic)
   //publisher2 := session.CreateTopicPublisher(topic)
-  //subscriber1 := session.CreateTopicSubscriber(topic)
+  subscriber1 := session.CreateTopicSubscriber(topic)
   // subscriber2 := session.CreateTopicSubscriber(topic)
   // subscriber3 := session.CreateTopicSubscriber(topic)
 
 
 
-  //subscriber1.SetMessageListener()
+  subscriber1.GetTopic()
 
   publisher.Send(session.CreateMessage("Pau que nasce torto", "arborismo",1,"m1"))
   //publisher2.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))

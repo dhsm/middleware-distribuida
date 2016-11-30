@@ -3,6 +3,7 @@ package topic_manager
 import "sync"
 import "container/heap"
 import . "../message"
+import . "../packet"
 //import . "../topic"
 
 type TopicManager struct {
@@ -21,7 +22,7 @@ func (tpcManager *TopicManager) CreateTopic(topic_name string){
   node.CreateNode(topic_name)
 }
 
-func (tpcManager *TopicManager) AddMessageToTopic(topicname string, msg Message){
+func (tpcManager *TopicManager) AddMessageToTopic(topicname string, msg Packet){
   println("!!! TopicManager add[MESSAGE_TO_TOPIC]")
   var addWindowMutex sync.Mutex
   addWindowMutex.Lock()

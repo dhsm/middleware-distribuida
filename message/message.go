@@ -21,3 +21,7 @@ func (msg *Message) CreateMessage(msgtext string, destination string, priority i
 func (msg *Message) GetText() string{
   return msg.MsgText
 }
+
+func (msg *Message) GetDestination() string{
+  return msg.Destination
+}

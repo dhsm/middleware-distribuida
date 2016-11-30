@@ -162,16 +162,16 @@ func (cnn Connection) CreateSession() TopicSession{
 }
 
 func (cnn *Connection) SendMessage(msg Message) error{
-	println("+++ Conection send[MESSAGE]")
+	//println("+++ Conection send[MESSAGE]")
 	err := cnn.IsOpen()
-	println("+++ Conection WTF")
+	//println("+++ Conection WTF")
 
 	if(err != nil){
 		fmt.Println(err)
 
 		return err
 	}
-	println("+++ Conection add WaitingACK")
+	//println("+++ Conection add WaitingACK")
 	cnn.WaitingACK.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
 
 	cnn.MessageSent.L.Lock()
@@ -182,11 +182,11 @@ func (cnn *Connection) SendMessage(msg Message) error{
 	cnn.SetModified()
 
 	pkt := Packet{}
-	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
+	params := []string{msg.GetDestination()}
+	pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, params, msg)
 	//pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
-	//pkt.CreatePacket(CREATE_TOPIC, cnn.PacketIDGenerator, nil, Message{})
 	cnn.PacketIDGenerator++
-	println("+++ Conection SendAsync packet")
+	//println("+++ Conection SendAsync packet")
 	cnn.SenderConnection.SendAsync(pkt)
 	return nil
 }
@@ -290,7 +290,7 @@ func (cnn *Connection) ProcessACKS(){
 	println("+++ Conection process[ACKS]")
 	go func() {
 		for{
-			println("ProcessACKS")
+			//println("ProcessACKS")
 			err := cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -300,7 +300,7 @@ func (cnn *Connection) ProcessACKS(){
 			if (cnn.WaitingACK.Len() == 0){
 				cnn.MessageSent.L.Lock()
 
-				println("ProcessACKS")
+				//println("ProcessACKS")
 				err := cnn.IsOpen()
 				if(err != nil){
 					log.Print(err)
@@ -311,7 +311,7 @@ func (cnn *Connection) ProcessACKS(){
 				cnn.MessageSent.L.Unlock()
 			}
 
-			println("ProcessACKS")
+			//println("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -329,7 +329,7 @@ func (cnn *Connection) ProcessACKS(){
 				}
 			}
 
-			println("ProcessACKS")
+			//println("ProcessACKS")
 			err = cnn.IsOpen()
 			if(err != nil){
 				log.Print(err)
@@ -339,7 +339,7 @@ func (cnn *Connection) ProcessACKS(){
 	}()
 }
 
-func (cnn Connection) OnPacket(pkt Packet){
+func (cnn *Connection) OnPacket(pkt Packet){
 	println("+++ Conection [ON_PACKET]")
 	if(!cnn.Stopped){
 		if(pkt.IsMessage()){
@@ -356,11 +356,18 @@ func (cnn Connection) OnPacket(pkt Packet){
 			}
 			cnn.Lock.Unlock()
 		}else if(pkt.IsACK()){
-			key := pkt.Params[1]
-			cnn.Lock.Lock()
-			cnn.WaitingACK.Remove(key)
-			cnn.AckReceived.Broadcast()
-			cnn.Lock.Unlock()
+			fmt.Println("Precessing packet [OnPacket] ",pkt)
+			fmt.Println("Length of params array on OnPacket ",len(pkt.Params))
+			if(len(pkt.Params) < 1){
+				fmt.Println(errors.New("Params (an slice) of packet has no ACK index"))
+				//panic(fmt.Sprintf("halp"))
+			}else{
+				key := pkt.Params[0]
+				cnn.Lock.Lock()
+				cnn.WaitingACK.Remove(key)
+				cnn.AckReceived.Broadcast()
+				cnn.Lock.Unlock()
+			}
 		}
 	}
 }
