@@ -73,7 +73,6 @@ func (ch *ConnectionHandler) Execute() {
 		ch.Running = false
 	}
 
-println("REGISTRATION COMPLETED")
 	for ch.Running{
 		if(ch.Type == SENDER){
 			err = ch.HandleReceivedMessages()
