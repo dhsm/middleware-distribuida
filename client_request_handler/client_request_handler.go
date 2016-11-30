@@ -3,7 +3,7 @@ package client_request_handler
 import "net"
 import "log"
 import "sync"
-import "io"
+// import "io"
 import "encoding/json"
 import "fmt"
 // import "math/rand"
@@ -142,7 +142,7 @@ func (crh *ClientRequestHandler) Receive() (Packet, error){
 
 	temp := make([]byte, 8)
 
-	read_len, err := io.ReadFull(crh.Connection,temp)
+	read_len, err := crh.Connection.Read(temp)
 
 	if(err!=nil){
 		log.Fatal(err)
@@ -160,7 +160,7 @@ func (crh *ClientRequestHandler) Receive() (Packet, error){
 
 	packetMsh := make([]byte, size)
 
-	read_len, err = io.ReadFull(crh.Connection,packetMsh)
+	read_len, err = crh.Connection.Read(packetMsh)
 
 	if(err!=nil){
 		log.Fatal(err)

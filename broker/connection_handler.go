@@ -1,7 +1,7 @@
 package broker
 
 import "net"
-import "io"
+// import "io"
 import "errors"
 import "time"
 import "log"
@@ -261,7 +261,7 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	println("@@@ ConnectionHandler [RECEIVE] *we are inside Lock()*")
 	temp := make([]byte, 8)
 	println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")
-	read_len, err := io.ReadFull(ch.Connection,temp)
+	read_len, err := ch.Connection.Read(temp)
 
 	if(err != nil){
 		log.Print(err)
@@ -278,7 +278,7 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 
 	packetMsh := make([]byte, size)
 	println("@@@ ConnectionHandler [RECEIVE] *read size packet*")
-	read_len, err = io.ReadFull(ch.Connection,packetMsh)
+	read_len, err = ch.Connection.Read(packetMsh)
 
 	if(err!=nil){
 		log.Print(err)
