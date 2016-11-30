@@ -182,7 +182,7 @@ func (cnn *Connection) SendMessage(msg Message) error{
 	cnn.SetModified()
 
 	pkt := Packet{}
-	params := []string{msg.GetDestination()}
+	params := []string{cnn.ClientID,msg.GetDestination()}
 	pkt.CreatePacket(MESSAGE.Ordinal(), cnn.PacketIDGenerator, params, msg)
 	//pkt.CreatePacket(MESSAGE, cnn.PacketIDGenerator, nil, msg)
 	cnn.PacketIDGenerator++
@@ -347,9 +347,11 @@ func (cnn *Connection) OnPacket(pkt Packet){
 			destination := msg.Destination
 			cnn.Lock.Lock()
 			sessions, found := cnn.Subscribed.Get(destination)
+			fmt.Println(sessions)
 			if(found){
 				for _, session := range sessions{
 					session.OnMessage(msg)
+					println("chamou on message de", destination)
 				}
 			}else{
 				println("No sessions")
@@ -369,6 +371,8 @@ func (cnn *Connection) OnPacket(pkt Packet){
 				cnn.Lock.Unlock()
 			}
 		}
+	}else{
+		println("Connection stopped!")
 	}
 }
 

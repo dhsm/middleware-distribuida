@@ -273,7 +273,7 @@ func (crh *ClientRequestHandler) Close() error{
 
 func (crh *ClientRequestHandler) SendAsync(pkt Packet){
 	go func(){
-		println("ΩΩΩ ClientRequestHandler sendAsync[PACKET]")
+		// println("ΩΩΩ ClientRequestHandler sendAsync[PACKET]")
 		crh.S.Lock()
 
 		encoded, err := json.Marshal(pkt)
@@ -288,7 +288,7 @@ func (crh *ClientRequestHandler) SendAsync(pkt Packet){
 
 		pkt_len := fmt.Sprintf("%06d",len(encoded))
 
-		println(pkt_len)
+		// println(pkt_len)
 
 		encoded_size, err := json.Marshal(pkt_len)
 

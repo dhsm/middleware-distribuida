@@ -73,6 +73,7 @@ func (ch *ConnectionHandler) Execute() {
 		ch.Running = false
 	}
 
+println("REGISTRATION COMPLETED")
 	for ch.Running{
 		if(ch.Type == SENDER){
 			err = ch.HandleReceivedMessages()
@@ -147,7 +148,7 @@ func (ch ConnectionHandler) SendMessages() error{
 		log.Print("Sending message ", pkt.GetMessage().MessageID," to client " , pkt.GetClientID())
 		msg := pkt.GetMessage()
 		wack := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-		wack.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()), msg.MessageID})
+		wack.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()) +(5*1000), msg.MessageID})
 		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , wack.Len(), "]")
 	}
 	return err
@@ -216,7 +217,7 @@ func (ch *ConnectionHandler) Send(pkt Packet) error{
 
 	defer ch.Lock.Unlock()
 	ch.Lock.Lock()
-	
+
 	encoded, err := json.Marshal(pkt)
 
 	// println("√√√√√√√√√√√√")
@@ -262,9 +263,9 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	defer ch.Lock.Unlock()
 	ch.Lock.Lock()
 
-	println("@@@ ConnectionHandler [RECEIVE] *we are inside Lock()*")
+	// println("@@@ ConnectionHandler [RECEIVE] *we are inside Lock()*")
 	temp := make([]byte, 8)
-	println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")
+	// println("@@@ ConnectionHandler [RECEIVE] *about to ReadFull*")
 	read_len, err := ch.Connection.Read(temp)
 
 	if(read_len != 8){
@@ -274,7 +275,7 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	if(err != nil){
 		log.Print(err)
 	}
-	println("@@@ ConnectionHandler [RECEIVE] *ReadFull, now will Unmarshall*")
+	// println("@@@ ConnectionHandler [RECEIVE] *ReadFull, now will Unmarshall*")
 	err = json.Unmarshal(temp[:read_len], &masPktSize)
 
 	if(err!=nil){
@@ -288,13 +289,13 @@ func (ch *ConnectionHandler) Receive() (Packet, error){
 	// println("√√√√√√√√√√√√")
 
 	packetMsh := make([]byte, size)
-	println("@@@ ConnectionHandler [RECEIVE] *read size packet*")
+	// println("@@@ ConnectionHandler [RECEIVE] *read size packet*")
 	read_len, err = ch.Connection.Read(packetMsh)
 
 	if(err!=nil){
 		log.Print(err)
 	}
-	println("@@@ ConnectionHandler [RECEIVE] *read message packet*")
+	// println("@@@ ConnectionHandler [RECEIVE] *read message packet*")
 	err = json.Unmarshal(packetMsh[:read_len], &pkt)
 
 	if(err!=nil){

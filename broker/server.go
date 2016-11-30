@@ -43,6 +43,7 @@ func (server *Server) Init() {
     connHandler.NewCH(id,conn,*server)
     server.Handlers[id] = &connHandler
     go connHandler.Execute()
+    fmt.Println(" ®®®®® HANDLERS ",server.Handlers)
   }
 }
 
@@ -81,6 +82,7 @@ func (server *Server) HandleCreateTopic(pkt Packet){
 func (server *Server) HandleMessage(pkt Packet){
   println("*** Server handle[MESSAGE]")
   topic := pkt.GetMessage().Destination
+  fmt.Println(topic)
   //server.MyTopicManager.AddMessageToTopic(topic, pkt.GetMessage())
   server.MyTopicManager.AddMessageToTopic(topic, pkt)
 
@@ -98,6 +100,9 @@ func (server *Server) HandleMessage(pkt Packet){
     // current_receiver = key
   }
   handler := server.Receivers[pkt.GetClientID()]
+  if(handler == nil){
+    println("FUDEO")
+  }
   handler.ToSend <- pkt_
   // server.Receivers[current_receiver].ToSend <- pkt_
 }

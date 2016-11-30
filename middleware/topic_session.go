@@ -1,6 +1,7 @@
 package middleware
 
 import "sync"
+//import "fmt"
 //import . "../topic"
 import . "../message"
 //import . "../topic_publisher"
@@ -11,6 +12,7 @@ type TopicSession struct {
   SubscribedList map[string][]TopicSubscriber
   MyConnectionSendMessage Connection
   MyMessageListener MessageListener
+  mu sync.Mutex
 }
 
 func (tsession *TopicSession) CreateSession(conn Connection) {
@@ -78,6 +80,19 @@ func (tsession *TopicSession) CreateMessage(msgtext string, destination string, 
 
 func (tsession *TopicSession) OnMessageReceived(msg Message) {
   println("### TopicSession [ON_MESSAGE_RECEIVED]")
+  tsession.mu.Lock()
+  topic := msg.Destination
+  list := tsession.SubscribedList[topic]
+  for _,subscriber := range list {
+    println("oi gente subscriber")
+    //fmt.Println(subscriber)
+    subscriber.OnMessage(msg)
+    // index is the index where we are
+    // element is the element from someSlice for where we are
+    }
+
+
+  tsession.mu.Unlock()
   //TODO check if msg really is the object that has SessionAck
   // msg.SetSessionAck(tsession)
   // topic := msg.GetTopic()

@@ -19,6 +19,7 @@ func (mm *MessageManager) NewMM(server Server, clientID string, lock *sync.Mutex
 
 func (mm *MessageManager) Execute(){
 	for{
+		println("øøøøøøøøø message_manager")
 		mm.Lock.Lock()
 		ref := mm.Server.Receivers[mm.ClientID]
 		waitingACK := ref.GetWaitingAck()
