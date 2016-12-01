@@ -5,7 +5,6 @@ import "fmt"
 import "log"
 import . "../packet"
 import . "../message"
-import . "../topic_manager"
 
 type Server struct {
 	//TODO checar esse socket aqui
@@ -24,7 +23,7 @@ func (server *Server) CreateServer(port string) {
   server.Senders = make(map[string]*ConnectionHandler)
   server.Receivers = make(map[string]*ConnectionHandler)
   tmanager := TopicManager{}
-  tmanager.CreateTopicManager()
+  tmanager.CreateTopicManager(server)
   server.MyTopicManager = tmanager
   server.NextHandlerId = 0
   ln, _ := net.Listen("tcp", port)
@@ -66,17 +65,18 @@ func (server *Server) HandleRegisterReceiver(pkt Packet, id int){
 
 func (server *Server) HandleSubscribe(pkt Packet){
   println("*** Server handle[SUBSCRIBE]")
-  server.MyTopicManager.Subscribe(pkt.GetMessage().Destination, pkt.GetClientID())
+  server.MyTopicManager.Subscribe(pkt.Params[1], pkt.GetClientID())
 }
 
 func (server *Server) HandleUnsubscribe(pkt Packet){
   println("*** Server handle[UNSUBSCRIBE]")
-  server.MyTopicManager.Unsubscribe(pkt.GetMessage().Destination, pkt.GetClientID())
+  server.MyTopicManager.Unsubscribe(pkt.Params[1], pkt.GetClientID())
 }
 
 func (server *Server) HandleCreateTopic(pkt Packet){
   println("*** Server handle[CREATETOPIC]")
-  server.MyTopicManager.CreateTopic(pkt.GetMessage().Destination)
+  println("*** Server ", pkt.GetMessage().Destination)
+  server.MyTopicManager.CreateTopic(pkt.Params[1])
 }
 
 func (server *Server) HandleMessage(pkt Packet){
@@ -84,8 +84,10 @@ func (server *Server) HandleMessage(pkt Packet){
   topic := pkt.GetMessage().Destination
   fmt.Println(topic)
   //server.MyTopicManager.AddMessageToTopic(topic, pkt.GetMessage())
-  server.MyTopicManager.AddMessageToTopic(topic, pkt)
-
+  err := server.MyTopicManager.AddMessageToTopic(topic, pkt)
+  if(err != nil){
+    panic(err)
+  }
   pkt_ := Packet{}
   fmt.Println("*** Server packet ::: ",pkt)
   fmt.Println("*** Server clientID ::: ",pkt.GetClientID())

@@ -1,12 +1,8 @@
 package middleware
 
 import "sync"
-//import "fmt"
-//import . "../topic"
+import "fmt"
 import . "../message"
-//import . "../topic_publisher"
-//import . "../topic_subscriber"
-//import . "../connection"
 
 type TopicSession struct {
   SubscribedList map[string][]TopicSubscriber
@@ -41,7 +37,8 @@ func (tsession *TopicSession) CreateTopicSubscriber(tpc Topic) TopicSubscriber {
 func (tsession *TopicSession) createSubscriberInternal(tpc Topic) interface{} {
   tsubscriber := TopicSubscriber{}
   tsubscriber.CreateTopicSubscriber(tpc, tsession)
-  tsession.MyConnectionSendMessage.SubscribeSessionToDestination(tpc, tsession.MyMessageListener)
+  fmt.Println(tsession.MyMessageListener)
+  tsession.MyConnectionSendMessage.Subscribe(tpc, tsubscriber)
 
   var mu sync.Mutex
 

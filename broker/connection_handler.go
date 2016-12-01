@@ -141,6 +141,7 @@ func (ch *ConnectionHandler) SendMessages() error{
 	ch.ACK.Lock()
 	println("@@@ ConnectionHandler send[MESSAGES]")
 	pkt := <-ch.ToSend
+	println("094328409238409823094 new message received")
 	err := ch.Send(pkt)
 
 	if(pkt.IsMessage()){
