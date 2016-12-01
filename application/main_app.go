@@ -2,8 +2,6 @@ package main
 
 import . "../middleware"
 
-import "time"
-
 func main() {
   conn := Connection{}
   conn.CreateConnection("127.0.0.1", "8082", "tcp")
@@ -31,14 +29,16 @@ func main() {
   subscriber2.GetTopic()
   subscriber3.GetTopic()
 
-  publisher.Send(session.CreateMessage("Pau que nasce torto", "perfumaria",1,"m1"))
-  publisher.Send(session.CreateMessage("Menina quando...", "perfumaria",1,"m2"))
-  publisher2.Send(session.CreateMessage("novo macbook", "eletronicos",1,"m2"))
+  publisher.Send(session.CreateMessage("Pau que nasce torto\nhttp://google.com.br", "perfumaria",1,"m1"))
+  publisher.Send(session.CreateMessage("Menina quando...\nhttp://google.com.br", "perfumaria",1,"m2"))
+  publisher2.Send(session.CreateMessage("novo macbook\nhttp://google.com.br", "eletronicos",1,"m3"))
   //publisher2.Send(session.CreateMessage("Nunca de endireita","arborismo", 5,"m2"))
 
-  messageFromInput := sendMessage()
-  publisher2.Send(session.CreateMessage(messageFromInput, "eletronicos",1,"m2"))
+  block := make(chan int)
 
-  time.Sleep(time.Second * 3000)
+  go notificationListener(&subscriber3)
+  go readNotifications(&publisher2, &session, "eletronicos", block)
+
+  <-block
 
 }

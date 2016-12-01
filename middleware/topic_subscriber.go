@@ -1,6 +1,6 @@
 package middleware
 
-//import "fmt"
+import "fmt"
 import . "../message"
 
 type TopicSubscriber struct{
@@ -20,5 +20,6 @@ func (tsubscriber *TopicSubscriber) GetTopic() Topic{
 }
 
 func (tsubscriber TopicSubscriber) OnMessage(msg Message){
+  fmt.Println(msg)
   tsubscriber.MessageChannel <- msg
 }
