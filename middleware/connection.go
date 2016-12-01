@@ -214,7 +214,7 @@ func (cnn *Connection) Subscribe(topic Topic, fu MessageListener) error{
 	}
 	cnn.SetModified()
 	cnn.SubscribeSessionToDestination(topic, fu)
-	fmt.Println(cnn.Subscribed)
+	//fmt.Println(cnn.Subscribed)
 	pkt := Packet{}
 	params := []string{cnn.ClientID, topic.GetTopicName()}
 	pkt.CreatePacket(SUBSCRIBE.Ordinal(), cnn.PacketIDGenerator, params, Message{})
@@ -348,17 +348,17 @@ func (cnn *Connection) OnPacket(pkt Packet){
 	println("+++ Conection [ON_PACKET]")
 	if(!cnn.Stopped){
 		if(pkt.IsMessage()){
-			println("ˆˆˆˆˆˆˆˆˆˆ^chegou no message")
+			//println("ˆˆˆˆˆˆˆˆˆˆ^chegou no message")
 			msg := pkt.GetMessage()
 			destination := msg.Destination
-			println("ˆˆˆˆˆˆˆˆˆˆ^ destination :::", destination)
+			//println("ˆˆˆˆˆˆˆˆˆˆ^ destination :::", destination)
 			cnn.Lock.Lock()
 			sessions, found := cnn.Subscribed.Get(destination)
-			fmt.Println(sessions)
+			//fmt.Println(sessions)
 			if(found){
 				for _, session := range sessions{
 					session.OnMessage(msg)
-					println("chamou on message de", destination)
+					println("Shamou on message de", session)
 				}
 			}else{
 				println("No sessions")
@@ -366,7 +366,7 @@ func (cnn *Connection) OnPacket(pkt Packet){
 			cnn.Lock.Unlock()
 		}else if(pkt.IsACK()){
 			fmt.Println("Precessing packet [OnPacket] ",pkt)
-			fmt.Println("Length of params array on OnPacket ",len(pkt.Params))
+			//fmt.Println("Length of params array on OnPacket ",len(pkt.Params))
 			if(len(pkt.Params) < 1){
 				fmt.Println(errors.New("Params (an slice) of packet has no ACK index"))
 				//panic(fmt.Sprintf("halp"))

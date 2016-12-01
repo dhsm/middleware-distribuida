@@ -1,7 +1,7 @@
 package broker
 
 import "sync"
-import "fmt"
+//import "fmt"
 import . "../packet"
 import  "errors"
 //import . "../broker"
@@ -24,7 +24,7 @@ func (tpcManager *TopicManager) CreateTopic(topic_name string){
   tpcManager.mu.Lock()
   println("!!! TopicManager create[TOPIC]")
   tpcManager.TopicMap[topic_name] = []string{}
-  fmt.Println(tpcManager.TopicMap)
+  //fmt.Println(tpcManager.TopicMap)
 }
 
 func (tpcManager *TopicManager) DeleteTopic(topic_name string){
@@ -54,13 +54,13 @@ func (tpcManager *TopicManager) Subscribe(topic_name string, clientID string) er
   println("!!! TopicManager [SUBSCRIBE]")
   subscribers, found := tpcManager.TopicMap[topic_name]
   if(!found){
-    fmt.Println(len(topic_name), "#", clientID)
-    fmt.Println(tpcManager.TopicMap)
+    //fmt.Println(len(topic_name), "#", clientID)
+    //fmt.Println(tpcManager.TopicMap)
     return errors.New("Tried to subscribe to a non existing topic")
   }else{
     subscribers = append(subscribers, clientID)
     tpcManager.TopicMap[topic_name] = subscribers
-    fmt.Println(tpcManager.TopicMap[topic_name])
+    //fmt.Println(tpcManager.TopicMap[topic_name])
   }
   return nil
 }

@@ -94,7 +94,7 @@ func (ch *ConnectionHandler) HandleReceivedMessages() error{
 
 	pkt, err := ch.Receive()
 
-	println("@@@ ConnectionHandler BACK TO handle[RECEIVED_MESSAGES]")
+	//println("@@@ ConnectionHandler BACK TO handle[RECEIVED_MESSAGES]")
 	if(err != nil){
 		return err
 	}
@@ -127,13 +127,13 @@ func (ch *ConnectionHandler) handleACK (pkt Packet){
 	println("@@@ ConnectionHandler handle[ACK]")
 
 
-	log.Print("Received ack for message ", pkt.GetMessage().MessageID, " from client ", pkt.GetClientID())
-	temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp.Len(), "]")
-	temp_3 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	temp_3.Remove(pkt.GetMessage().MessageID)
-	temp_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
-	log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
+	//log.Print("Received ack for message ", pkt.GetMessage().MessageID, " from client ", pkt.GetClientID())
+	//temp := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	//log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp.Len(), "]")
+	//temp_3 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	//temp_3.Remove(pkt.GetMessage().MessageID)
+	//temp_2 := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
+	//log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , temp_2.Len(), "]")
 }
 
 func (ch *ConnectionHandler) SendMessages() error{
@@ -141,15 +141,15 @@ func (ch *ConnectionHandler) SendMessages() error{
 	ch.ACK.Lock()
 	println("@@@ ConnectionHandler send[MESSAGES]")
 	pkt := <-ch.ToSend
-	println("094328409238409823094 new message received")
+	//println("094328409238409823094 new message received")
 	err := ch.Send(pkt)
 
 	if(pkt.IsMessage()){
-		log.Print("Sending message ", pkt.GetMessage().MessageID," to client " , pkt.GetClientID())
+		//log.Print("Sending message ", pkt.GetMessage().MessageID," to client " , pkt.GetClientID())
 		msg := pkt.GetMessage()
 		wack := ch.Server.Receivers[ch.ClientID].GetWaitingAck()
 		wack.Add(msg.MessageID, MessageWaitingAck{msg, int32(time.Now().Unix()) +(5*1000), msg.MessageID})
-		log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , wack.Len(), "]")
+		//log.Print("Received ack [id: " , pkt.GetID() , "] [size: " , wack.Len(), "]")
 	}
 	return err
 }
@@ -177,7 +177,7 @@ func (ch *ConnectionHandler) HandleRegister() error {
 
 func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 	println("@@@ ConnectionHandler handle[REGISTER_RECEIVER]")
-	log.Print("Producer registered ", ch.ID)
+	//log.Print("Producer registered ", ch.ID)
 	ch.Type = RECEIVER
 
 	//Creating ACK response
@@ -198,7 +198,7 @@ func (ch *ConnectionHandler) HandleRegisterReceiver (pkt Packet) error {
 func (ch *ConnectionHandler) HandleRegisterSender (pkt Packet) error {
 	println("@@@ ConnectionHandler handle[REGISTER_SENDER]")
 
-	log.Print("Sender registered ", ch.ID)
+	//log.Print("Sender registered ", ch.ID)
 	ch.Type = SENDER
 
 	//Creating ACK response

@@ -98,7 +98,7 @@ func (crh *ClientRequestHandler) NewCRHS(protocol string, port string) error{
 }
 
 func (crh *ClientRequestHandler) Send(pkt Packet) error{
-	println("ΩΩΩ ClientRequestHandler send[PACKET]")
+	//println("ΩΩΩ ClientRequestHandler send[PACKET]")
 	defer crh.S.Unlock()
 	crh.S.Lock()
 
@@ -115,7 +115,7 @@ func (crh *ClientRequestHandler) Send(pkt Packet) error{
 
 	pkt_len := fmt.Sprintf("%06d",len(encoded))
 
-	println(pkt_len)
+	//println(pkt_len)
 
 	encoded_size, err := json.Marshal(pkt_len)
 
@@ -136,7 +136,7 @@ func (crh *ClientRequestHandler) Send(pkt Packet) error{
 }
 
 func (crh *ClientRequestHandler) Receive() (Packet, error){
-	println("ΩΩΩ ClientRequestHandler receive[PACKET]")
+	//println("ΩΩΩ ClientRequestHandler receive[PACKET]")
 	defer crh.R.Unlock()
 	crh.R.Lock()
 

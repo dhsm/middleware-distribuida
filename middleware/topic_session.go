@@ -81,7 +81,6 @@ func (tsession *TopicSession) OnMessageReceived(msg Message) {
   topic := msg.Destination
   list := tsession.SubscribedList[topic]
   for _,subscriber := range list {
-    println("oi gente subscriber")
     //fmt.Println(subscriber)
     subscriber.OnMessage(msg)
     // index is the index where we are

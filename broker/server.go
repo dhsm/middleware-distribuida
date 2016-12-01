@@ -42,7 +42,7 @@ func (server *Server) Init() {
     connHandler.NewCH(id,conn,*server)
     server.Handlers[id] = &connHandler
     go connHandler.Execute()
-    fmt.Println(" ®®®®® HANDLERS ",server.Handlers)
+    //fmt.Println(" ®®®®® HANDLERS ",server.Handlers)
   }
 }
 
@@ -89,13 +89,13 @@ func (server *Server) HandleMessage(pkt Packet){
     panic(err)
   }
   pkt_ := Packet{}
-  fmt.Println("*** Server packet ::: ",pkt)
-  fmt.Println("*** Server clientID ::: ",pkt.GetClientID())
+  //fmt.Println("*** Server packet ::: ",pkt)
+  //fmt.Println("*** Server clientID ::: ",pkt.GetClientID())
 	params := []string{pkt.GetClientID(), pkt.MessageID}
 	pkt_.CreatePacket(ACK.Ordinal(), 0, params, Message{})
 
   //server.Receivers[pkt.GetClientID()].ToSend <- pkt_
-  fmt.Println("*** Server receivers ::: ",server.Receivers)
+  //fmt.Println("*** Server receivers ::: ",server.Receivers)
   // current_receiver := ""
   for key, _ := range server.Receivers {
     fmt.Println("Key:", key)
